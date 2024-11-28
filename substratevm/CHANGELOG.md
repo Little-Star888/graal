@@ -4,6 +4,7 @@ This changelog summarizes major changes to GraalVM Native Image.
 
 ## GraalVM for JDK 25
 * (GR-58668) Enabled [Whole-Program Sparse Conditional Constant Propagation (WP-SCCP)](https://github.com/oracle/graal/pull/9821) by default, improving the precision of points-to analysis in Native Image. This optimization enhances static analysis accuracy and scalability, potentially reducing the size of the final native binary.
+* (GR-59864) Added JVM version check to the Native Image agent. The agent will abort execution if the JVM major version does not match the version it was built with, and warn if the full JVM version is different.
 
 ## GraalVM for JDK 24 (Internal Version 24.2.0)
 * (GR-59717) Added `DuringSetupAccess.registerObjectReachabilityHandler` to allow registering a callback that is executed when an object of a specified type is marked as reachable during heap scanning.
