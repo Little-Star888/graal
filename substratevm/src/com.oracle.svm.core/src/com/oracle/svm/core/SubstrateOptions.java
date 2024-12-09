@@ -1284,19 +1284,19 @@ public class SubstrateOptions {
     public static final HostedOptionKey<AccumulatingLocatableMultiOptionValue.Strings> IncludeAllFromModule = new HostedOptionKey<>(AccumulatingLocatableMultiOptionValue.Strings.build());
 
     @Option(help = "Include all classes, methods, fields, and resources from a given module for dynamic access", type = OptionType.Debug) //
-    public static final HostedOptionKey<AccumulatingLocatableMultiOptionValue.Strings> IncludeAllMetadataForModule = new HostedOptionKey<>(AccumulatingLocatableMultiOptionValue.Strings.build());
+    public static final HostedOptionKey<AccumulatingLocatableMultiOptionValue.Strings> EnableDynamicAccessForModule = new HostedOptionKey<>(AccumulatingLocatableMultiOptionValue.Strings.build());
 
     @Option(help = "Include all classes, methods, fields, and resources from given paths", type = OptionType.Debug) //
     public static final HostedOptionKey<AccumulatingLocatableMultiOptionValue.Strings> IncludeAllFromPath = new HostedOptionKey<>(AccumulatingLocatableMultiOptionValue.Strings.build());
 
     @Option(help = "Include all classes, methods, fields, and resources from given paths for dynamic access", type = OptionType.Debug) //
-    public static final HostedOptionKey<AccumulatingLocatableMultiOptionValue.Strings> IncludeAllMetadataForClassPathEntry = new HostedOptionKey<>(AccumulatingLocatableMultiOptionValue.Strings.build());
+    public static final HostedOptionKey<AccumulatingLocatableMultiOptionValue.Strings> EnableDynamicAccessForClassPathEntry = new HostedOptionKey<>(AccumulatingLocatableMultiOptionValue.Strings.build());
 
     @Option(help = "Include all classes, methods, fields, and resources from the class path", type = OptionType.Debug) //
     public static final HostedOptionKey<Boolean> IncludeAllFromClassPath = new HostedOptionKey<>(false);
 
     @Option(help = "Include all classes, methods, fields, and resources for dynamic access for the whole classpath", type = OptionType.Debug) //
-    public static final HostedOptionKey<Boolean> IncludeAllMetadataForClassPath = new HostedOptionKey<>(false);
+    public static final HostedOptionKey<Boolean> EnableDynamicAccess = new HostedOptionKey<>(false);
 
     public static boolean includeAll() {
         return IncludeAllFromModule.hasBeenSet() || IncludeAllFromPath.hasBeenSet() || IncludeAllFromClassPath.hasBeenSet();

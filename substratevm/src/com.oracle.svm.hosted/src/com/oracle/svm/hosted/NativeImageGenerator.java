@@ -32,6 +32,8 @@ import static jdk.graal.compiler.replacements.StandardGraphBuilderPlugins.regist
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.file.FileSystems;
@@ -75,7 +77,9 @@ import org.graalvm.nativeimage.hosted.RuntimeReflection;
 import org.graalvm.nativeimage.hosted.RuntimeSerialization;
 import org.graalvm.nativeimage.impl.AnnotationExtractor;
 import org.graalvm.nativeimage.impl.CConstantValueSupport;
+import org.graalvm.nativeimage.impl.ConfigurationCondition;
 import org.graalvm.nativeimage.impl.RuntimeClassInitializationSupport;
+import org.graalvm.nativeimage.impl.RuntimeReflectionSupport;
 import org.graalvm.nativeimage.impl.SizeOfSupport;
 import org.graalvm.word.PointerBase;
 
@@ -1085,23 +1089,28 @@ public class NativeImageGenerator {
         }
     }
 
-    private static void registerClassFullyForReflection(Class<?> cls) {
-        RuntimeReflection.register(cls);
-        RuntimeJNIAccess.register(cls);
-        for (Method declaredMethod : cls.getDeclaredMethods()) {
-            RuntimeReflection.register(declaredMethod);
+    private static void registerClassFullyForReflection(Class<?> clazz) {
+        RuntimeReflection.register(clazz);
+
+        RuntimeReflection.registerAllDeclaredFields(clazz);
+        RuntimeReflection.registerAllDeclaredMethods(clazz);
+        RuntimeReflection.registerAllDeclaredConstructors(clazz);
+
+        RuntimeJNIAccess.register(clazz);
+        for (Method declaredMethod : ReflectionUtil.linkageSafeQuery(clazz, new Method[0], Class::getDeclaredMethods)) {
             RuntimeJNIAccess.register(declaredMethod);
         }
-        RuntimeReflection.registerAllDeclaredFields(cls);
-        RuntimeReflection.registerAllFields(cls);
-        RuntimeReflection.registerAllMethods(cls);
-        RuntimeReflection.registerAllDeclaredMethods(cls);
-
-        for (var declaredField : cls.getDeclaredFields()) {
-            RuntimeReflection.register(declaredField);
+        for (Constructor<?> declaredConstructor : ReflectionUtil.linkageSafeQuery(clazz, new Constructor[0], Class::getDeclaredConstructors)) {
+            RuntimeJNIAccess.register(declaredConstructor);
+        }
+        for (var declaredField : ReflectionUtil.linkageSafeQuery(clazz, new Field[0], Class::getDeclaredFields)) {
             RuntimeJNIAccess.register(declaredField);
         }
-        RuntimeSerialization.register(cls);
+
+        RuntimeSerialization.register(clazz);
+        if (!(clazz.isArray() || clazz.isInterface() || clazz.isPrimitive() || Modifier.isAbstract(clazz.getModifiers()))) {
+            ImageSingletons.lookup(RuntimeReflectionSupport.class).register(ConfigurationCondition.alwaysTrue(), true, clazz);
+        }
     }
 
     protected void registerEntryPointStubs(Map<Method, CEntryPointData> entryPoints) {

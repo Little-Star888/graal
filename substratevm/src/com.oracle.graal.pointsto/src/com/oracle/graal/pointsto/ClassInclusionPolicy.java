@@ -34,6 +34,7 @@ import org.graalvm.nativeimage.hosted.Feature;
 
 import com.oracle.graal.pointsto.meta.AnalysisMethod;
 import com.oracle.svm.core.annotate.TargetClass;
+import com.oracle.svm.util.ReflectionUtil;
 
 import jdk.graal.compiler.api.replacements.Fold;
 
@@ -55,7 +56,7 @@ public abstract class ClassInclusionPolicy {
     }
 
     public static boolean isClassIncludedBase(Class<?> cls) {
-        Class<?> enclosingClass = cls.getEnclosingClass();
+        Class<?> enclosingClass = ReflectionUtil.linkageSafeQuery(cls, null, Class::getEnclosingClass);
         return !Feature.class.isAssignableFrom(cls) && !AnnotationAccess.isAnnotationPresent(cls, TargetClass.class) && (enclosingClass == null || isClassIncludedBase(enclosingClass));
     }
 

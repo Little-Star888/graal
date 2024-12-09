@@ -116,8 +116,8 @@ public class ClassLoaderSupportImpl extends ClassLoaderSupport {
 
         /* Collect remaining resources from classpath */
         classLoaderSupport.classpath().stream().parallel().forEach(classpathFile -> {
-            boolean includeCurrent = classLoaderSupport.getJavaPathsToInclude().contains(classpathFile) || classLoaderSupport.includeAllFromClassPath() ||
-                    classLoaderSupport.getPathsToIncludeMetadata().contains(classpathFile) || classLoaderSupport.isIncludeAllMetadataFromClassPath();
+            boolean includeCurrent = classLoaderSupport.getPathsToInclude().contains(classpathFile) || classLoaderSupport.includeAllFromClassPath() ||
+                    classLoaderSupport.getClassPathEntriesToEnableDynamicAccess().contains(classpathFile) || classLoaderSupport.isEnableDynamicAccessForClassPath();
             try {
                 if (Files.isDirectory(classpathFile)) {
                     scanDirectory(classpathFile, resourceCollector, includeCurrent);
@@ -134,7 +134,7 @@ public class ClassLoaderSupportImpl extends ClassLoaderSupport {
         ModuleReference moduleReference = info.resolvedModule.reference();
         try (ModuleReader moduleReader = moduleReference.open()) {
             boolean includeCurrent = classLoaderSupport.getModuleNamesToInclude().contains(info.resolvedModule().name()) ||
-                            classLoaderSupport.getModuleNamesToIncludeMetadata().contains(info.resolvedModule().name());
+                            classLoaderSupport.getModuleNamesToEnableDynamicAccess().contains(info.resolvedModule().name());
             List<ConditionalResource> resourcesFound = new ArrayList<>();
             moduleReader.list().forEach(resourceName -> {
                 var conditionsWithOrigins = shouldIncludeEntry(info.module, resourceCollector, resourceName, moduleReference.location().orElse(null), includeCurrent);

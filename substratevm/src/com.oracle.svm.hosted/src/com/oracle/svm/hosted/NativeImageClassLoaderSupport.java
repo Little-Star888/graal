@@ -27,9 +27,9 @@ package com.oracle.svm.hosted;
 import static com.oracle.svm.core.SubstrateOptions.IncludeAllFromClassPath;
 import static com.oracle.svm.core.SubstrateOptions.IncludeAllFromModule;
 import static com.oracle.svm.core.SubstrateOptions.IncludeAllFromPath;
-import static com.oracle.svm.core.SubstrateOptions.IncludeAllMetadataForModule;
-import static com.oracle.svm.core.SubstrateOptions.IncludeAllMetadataForClassPath;
-import static com.oracle.svm.core.SubstrateOptions.IncludeAllMetadataForClassPathEntry;
+import static com.oracle.svm.core.SubstrateOptions.EnableDynamicAccessForModule;
+import static com.oracle.svm.core.SubstrateOptions.EnableDynamicAccess;
+import static com.oracle.svm.core.SubstrateOptions.EnableDynamicAccessForClassPathEntry;
 import static com.oracle.svm.core.util.VMError.guarantee;
 import static com.oracle.svm.core.util.VMError.shouldNotReachHere;
 
@@ -131,14 +131,14 @@ public final class NativeImageClassLoaderSupport {
 
     public final AnnotationExtractor annotationExtractor;
 
-    private Set<String> javaModuleNamesToInclude;
-    private Set<String> moduleNamesToIncludeMetadata;
+    private Set<String> moduleNamesToInclude;
+    private Set<String> moduleNamesToEnableDynamicAccess;
 
-    private Set<Path> javaPathsToInclude;
-    private Set<Path> pathsToIncludeMetadata;
+    private Set<Path> pathsToInclude;
+    private Set<Path> classPathEntriesToEnableDynamicAccess;
 
     private boolean includeAllFromClassPath;
-    private boolean includeAllMetadataFromClassPath;
+    private boolean enableDynamicAccessForClassPath;
 
     private Optional<LibGraalClassLoaderBase> libGraalLoader;
     private List<ClassLoader> classLoaders;
@@ -254,16 +254,16 @@ public final class NativeImageClassLoaderSupport {
     }
 
     public void loadAllClasses(ForkJoinPool executor, ImageClassLoader imageClassLoader) {
-        guarantee(javaModuleNamesToInclude == null, "This method should be executed only once.");
+        guarantee(moduleNamesToInclude == null, "This method should be executed only once.");
 
-        javaModuleNamesToInclude = collectAndVerifyModulesFromOption(IncludeAllFromModule);
-        moduleNamesToIncludeMetadata = collectAndVerifyModulesFromOption(IncludeAllMetadataForModule);
+        moduleNamesToInclude = collectAndVerifyModulesFromOption(IncludeAllFromModule);
+        moduleNamesToEnableDynamicAccess = collectAndVerifyModulesFromOption(EnableDynamicAccessForModule);
 
-        javaPathsToInclude = collectAndVerifyPathsFromOption(IncludeAllFromPath);
-        pathsToIncludeMetadata = collectAndVerifyPathsFromOption(IncludeAllMetadataForClassPathEntry);
+        pathsToInclude = collectAndVerifyPathsFromOption(IncludeAllFromPath);
+        classPathEntriesToEnableDynamicAccess = collectAndVerifyPathsFromOption(EnableDynamicAccessForClassPathEntry);
 
         includeAllFromClassPath = IncludeAllFromClassPath.getValue(parsedHostedOptions);
-        includeAllMetadataFromClassPath = IncludeAllMetadataForClassPath.getValue(parsedHostedOptions);
+        enableDynamicAccessForClassPath = EnableDynamicAccess.getValue(parsedHostedOptions);
 
         new LoadClassHandler(executor, imageClassLoader).run();
 
@@ -763,7 +763,7 @@ public final class NativeImageClassLoaderSupport {
                                 "org.graalvm.nativebridge"));
 
                 Set<String> additionalSystemModules = upgradeAndSystemModuleFinder.findAll().stream().map(v -> v.descriptor().name()).collect(Collectors.toSet());
-                additionalSystemModules.retainAll(getModuleNamesToIncludeMetadata());
+                additionalSystemModules.retainAll(getModuleNamesToEnableDynamicAccess());
                 requiresInit.addAll(additionalSystemModules);
 
                 for (ModuleReference moduleReference : upgradeAndSystemModuleFinder.findAll()) {
@@ -790,8 +790,8 @@ public final class NativeImageClassLoaderSupport {
             }
             try (ModuleReader moduleReader = moduleReference.open()) {
                 Module module = optionalModule.get();
-                final boolean includeUnconditionally = javaModuleNamesToInclude.contains(module.getName());
-                final boolean includeForReflection = moduleNamesToIncludeMetadata.contains(module.getName());
+                final boolean includeUnconditionally = moduleNamesToInclude.contains(module.getName());
+                final boolean includeForReflection = moduleNamesToEnableDynamicAccess.contains(module.getName());
                 var container = moduleReference.location().orElseThrow();
                 if (ModuleLayer.boot().equals(module.getLayer())) {
                     builderURILocations.add(container);
@@ -811,8 +811,8 @@ public final class NativeImageClassLoaderSupport {
         }
 
         private void loadClassesFromPath(Path path) {
-            final boolean includeUnconditionally = javaPathsToInclude.contains(path) || includeAllFromClassPath;
-            final boolean includeAllMetadata = pathsToIncludeMetadata.contains(path) || includeAllMetadataFromClassPath;
+            final boolean includeUnconditionally = pathsToInclude.contains(path) || includeAllFromClassPath;
+            final boolean includeAllMetadata = classPathEntriesToEnableDynamicAccess.contains(path) || enableDynamicAccessForClassPath;
             if (ClasspathUtils.isJar(path)) {
                 try {
                     URI container = path.toAbsolutePath().toUri();
@@ -1031,27 +1031,27 @@ public final class NativeImageClassLoaderSupport {
     }
 
     public Set<String> getModuleNamesToInclude() {
-        return javaModuleNamesToInclude;
+        return moduleNamesToInclude;
     }
 
-    public Set<String> getModuleNamesToIncludeMetadata() {
-        return moduleNamesToIncludeMetadata;
+    public Set<String> getModuleNamesToEnableDynamicAccess() {
+        return moduleNamesToEnableDynamicAccess;
     }
 
-    public Set<Path> getJavaPathsToInclude() {
-        return javaPathsToInclude;
+    public Set<Path> getPathsToInclude() {
+        return pathsToInclude;
     }
 
-    public Set<Path> getPathsToIncludeMetadata() {
-        return pathsToIncludeMetadata;
+    public Set<Path> getClassPathEntriesToEnableDynamicAccess() {
+        return classPathEntriesToEnableDynamicAccess;
     }
 
     public boolean includeAllFromClassPath() {
         return includeAllFromClassPath;
     }
 
-    public boolean isIncludeAllMetadataFromClassPath() {
-        return includeAllMetadataFromClassPath;
+    public boolean isEnableDynamicAccessForClassPath() {
+        return enableDynamicAccessForClassPath;
     }
 
     public List<Class<?>> getClassesToIncludeUnconditionally() {
