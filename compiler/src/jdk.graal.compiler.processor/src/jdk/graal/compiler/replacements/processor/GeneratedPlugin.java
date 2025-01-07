@@ -81,7 +81,7 @@ public abstract class GeneratedPlugin {
         out.printf("        if (!b.isPluginEnabled(this)) {\n");
         out.printf("            return false;\n");
         out.printf("        }\n");
-        InjectedDependencies deps = new InjectedDependencies(true, intrinsicMethod);
+        InjectedDependencies deps = new InjectedDependencies(false, intrinsicMethod);
         createExecute(processor, out, deps);
         out.printf("    }\n");
         out.printf("    @Override\n");
@@ -187,13 +187,10 @@ public abstract class GeneratedPlugin {
         }
     }
 
-    protected void createPrivateMembersAndConstructor(AbstractProcessor processor, PrintWriter out, InjectedDependencies deps, String constructorName) {
+    protected void createPrivateMembersAndConstructor(@SuppressWarnings("unused") AbstractProcessor processor, PrintWriter out, InjectedDependencies deps, String constructorName) {
         if (!deps.isEmpty()) {
             out.printf("\n");
-            for (InjectedDependencies.Dependency dep : deps) {
-                out.printf("    private final %s %s;\n", dep.getType(), dep.getName(processor, intrinsicMethod));
-            }
-
+            out.printf("    private final GeneratedPluginInjectionProvider injection;\n");
             needInjectionProvider = true;
         }
 
@@ -207,8 +204,8 @@ public abstract class GeneratedPlugin {
             out.printf(", %s.class", getErasedType(arg.asType()));
         }
         out.printf(");\n");
-        for (InjectedDependencies.Dependency dep : deps) {
-            out.printf("        this.%s = %s;\n", dep.getName(processor, intrinsicMethod), dep.getExpression(processor, intrinsicMethod));
+        if (needInjectionProvider) {
+            out.printf("        this.%s = %s;\n", "injection", "injection");
         }
         out.printf("    }\n");
     }
@@ -258,13 +255,8 @@ public abstract class GeneratedPlugin {
                     int argIdx,
                     TypeMirror type,
                     int nodeIdx,
-                    boolean isReplacement) {
-        Function<Integer, String> argFormatter;
-        if (isReplacement) {
-            argFormatter = (i) -> String.format("args.get(%d)", i);
-        } else {
-            argFormatter = (i) -> String.format("args[%d]", i);
-        }
+                    boolean checkShouldDefer) {
+        Function<Integer, String> argFormatter = (i) -> String.format("args[%d]", i);
         if (hasRawtypeWarning(type)) {
             out.printf("        @SuppressWarnings({\"rawtypes\"})\n");
         }
@@ -314,7 +306,7 @@ public abstract class GeneratedPlugin {
             }
         }
         out.printf("        } else {\n");
-        if (!isReplacement) {
+        if (checkShouldDefer) {
             out.printf("            if (b.shouldDeferPlugin(this)) {\n");
             out.printf("                b.replacePlugin%s(this, targetMethod, args, %s.FUNCTION);\n", getReplacementFunctionSuffix(processor), getReplacementName());
             out.printf("                return true;\n");

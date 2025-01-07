@@ -30,12 +30,10 @@ import static org.graalvm.nativeimage.ImageInfo.inImageRuntimeCode;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.List;
 
 import jdk.graal.compiler.api.replacements.Fold;
 import jdk.graal.compiler.debug.GraalError;
 import jdk.graal.compiler.graph.Node.NodeIntrinsic;
-import jdk.graal.compiler.nodes.PluginReplacementNode;
 import jdk.graal.compiler.nodes.ValueNode;
 import jdk.graal.compiler.nodes.graphbuilderconf.InvocationPlugin.RequiredInlineOnlyInvocationPlugin;
 import jdk.vm.ci.meta.MetaAccessProvider;
@@ -47,16 +45,6 @@ import jdk.vm.ci.meta.ResolvedJavaType;
  * {@link Fold}.
  */
 public abstract class GeneratedInvocationPlugin extends RequiredInlineOnlyInvocationPlugin {
-
-    private static List<Class<?>> foldNodePluginClasses = List.of(GeneratedFoldInvocationPlugin.class, PluginReplacementNode.ReplacementFunction.class);
-
-    public static void setFoldNodePluginClasses(List<Class<?>> customFoldNodePluginClasses) {
-        foldNodePluginClasses = customFoldNodePluginClasses;
-    }
-
-    public static List<Class<?>> getFoldNodePluginClasses() {
-        return foldNodePluginClasses;
-    }
 
     private ResolvedJavaMethod executeMethod;
 
@@ -97,18 +85,15 @@ public abstract class GeneratedInvocationPlugin extends RequiredInlineOnlyInvoca
             return false;
         }
 
+        ResolvedJavaMethod thisExecuteMethod = getExecutedMethod(b);
         if (inImageBuildtimeCode()) {
-            // The use of this plugin in the plugin itself shouldn't be folded since that defeats
-            // the purpose of the fold.
-            for (Class<?> foldNodePluginClass : foldNodePluginClasses) {
-                ResolvedJavaType foldNodeClass = b.getMetaAccess().lookupJavaType(foldNodePluginClass);
-                if (foldNodeClass.isAssignableFrom(b.getMethod().getDeclaringClass())) {
-                    return false;
-                }
+            // Calls to the @Fold method from the generated fold plugin shouldn't be folded.
+            ResolvedJavaType pluginClass = thisExecuteMethod.getDeclaringClass();
+            if (pluginClass.getName().equals(b.getMethod().getDeclaringClass().getName())) {
+                return false;
             }
         }
 
-        ResolvedJavaMethod thisExecuteMethod = getExecutedMethod(b);
         if (b.getMethod().equals(thisExecuteMethod)) {
             return true;
         }

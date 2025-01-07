@@ -66,137 +66,46 @@ public class GeneratedFoldPlugin extends GeneratedPlugin {
         imports.add("jdk.vm.ci.meta.JavaConstant");
         imports.add("jdk.vm.ci.meta.JavaKind");
         imports.add("jdk.graal.compiler.nodes.ConstantNode");
-        imports.add("jdk.graal.compiler.core.common.type.Stamp");
     }
 
     @Override
     protected void createExecute(AbstractProcessor processor, PrintWriter out, InjectedDependencies deps) {
-        List<? extends VariableElement> params = intrinsicMethod.getParameters();
-
         out.printf("        if (b.shouldDeferPlugin(this)) {\n");
         out.printf("            b.replacePlugin%s(this, targetMethod, args, %s.FUNCTION);\n", getReplacementFunctionSuffix(processor), getReplacementName());
         out.printf("            return true;\n");
         out.printf("        }\n");
 
-        int argCount = 0;
+        int argCount = intrinsicMethod.getModifiers().contains(Modifier.STATIC) ? 0 : 1;
+        for (VariableElement param : intrinsicMethod.getParameters()) {
+            if (processor.getAnnotation(param, processor.getType(INJECTED_PARAMETER_CLASS_NAME)) != null) {
+                out.printf("        if (!checkInjectedArgument(b, args[%d], targetMethod)) {\n", argCount);
+                out.printf("            return false;\n");
+                out.printf("        }\n");
+            }
+            argCount++;
+        }
+
+        out.printf("        return replaceFunction(b, injection, args);\n");
+    }
+
+    private void emitReplace(AbstractProcessor processor, PrintWriter out, InjectedDependencies deps) {
+        List<? extends VariableElement> params = intrinsicMethod.getParameters();
+        final int firstArg = intrinsicMethod.getModifiers().contains(Modifier.STATIC) ? 0 : 1;
         Object receiver;
-        if (intrinsicMethod.getModifiers().contains(Modifier.STATIC)) {
+        if (firstArg == 0) {
             receiver = intrinsicMethod.getEnclosingElement();
         } else {
             receiver = "arg0";
             TypeElement type = (TypeElement) intrinsicMethod.getEnclosingElement();
-            constantArgument(processor, out, deps, argCount, type.asType(), argCount, false);
-            argCount++;
+            constantArgument(processor, out, deps, 0, type.asType(), 0, false);
         }
 
-        int firstArg = argCount;
+        int argCount = firstArg;
         for (VariableElement param : params) {
             if (processor.getAnnotation(param, processor.getType(INJECTED_PARAMETER_CLASS_NAME)) == null) {
                 constantArgument(processor, out, deps, argCount, param.asType(), argCount, false);
             } else {
-                out.printf("        if (!checkInjectedArgument(b, args[%d], targetMethod)) {\n", argCount);
-                out.printf("            return false;\n");
-                out.printf("        }\n");
-                out.printf("        %s arg%d = %s;\n", param.asType(), argCount, deps.use(processor, (DeclaredType) param.asType()));
-            }
-            argCount++;
-        }
-
-        Set<String> suppressWarnings = new TreeSet<>();
-        if (intrinsicMethod.getAnnotation(Deprecated.class) != null) {
-            suppressWarnings.add("deprecation");
-        }
-        if (hasRawtypeWarning(intrinsicMethod.getReturnType())) {
-            suppressWarnings.add("rawtypes");
-        }
-        for (VariableElement param : params) {
-            if (hasUncheckedWarning(param.asType())) {
-                suppressWarnings.add("unchecked");
-            }
-        }
-        if (suppressWarnings.size() > 0) {
-            out.printf("        @SuppressWarnings({");
-            String sep = "";
-            for (String suppressWarning : suppressWarnings) {
-                out.printf("%s\"%s\"", sep, suppressWarning);
-                sep = ", ";
-            }
-            out.printf("})\n");
-        }
-
-        out.printf("        %s result = %s.%s(", getErasedType(intrinsicMethod.getReturnType()), receiver, intrinsicMethod.getSimpleName());
-        if (argCount > firstArg) {
-            out.printf("arg%d", firstArg);
-            for (int i = firstArg + 1; i < argCount; i++) {
-                out.printf(", arg%d", i);
-            }
-        }
-        out.printf(");\n");
-
-        TypeMirror returnType = intrinsicMethod.getReturnType();
-        switch (returnType.getKind()) {
-            case BOOLEAN:
-                out.printf("        JavaConstant constant = JavaConstant.forInt(result ? 1 : 0);\n");
-                break;
-            case BYTE:
-            case SHORT:
-            case CHAR:
-            case INT:
-                out.printf("        JavaConstant constant = JavaConstant.forInt(result);\n");
-                break;
-            case LONG:
-                out.printf("        JavaConstant constant = JavaConstant.forLong(result);\n");
-                break;
-            case FLOAT:
-                out.printf("        JavaConstant constant = JavaConstant.forFloat(result);\n");
-                break;
-            case DOUBLE:
-                out.printf("        JavaConstant constant = JavaConstant.forDouble(result);\n");
-                break;
-            case ARRAY:
-            case TYPEVAR:
-            case DECLARED:
-                if (returnType.equals(processor.getType("java.lang.String"))) {
-                    out.printf("        JavaConstant constant = %s.forString(result);\n", deps.use(processor, WellKnownDependency.CONSTANT_REFLECTION));
-                } else {
-                    out.printf("        JavaConstant constant = %s.forObject(result);\n", deps.use(processor, WellKnownDependency.SNIPPET_REFLECTION));
-                }
-                break;
-            default:
-                throw new IllegalArgumentException(returnType.toString());
-        }
-
-        out.printf("        ConstantNode node = ConstantNode.forConstant(constant, %s, %s);\n", deps.use(processor, WellKnownDependency.META_ACCESS),
-                        deps.use(processor, WellKnownDependency.STRUCTURED_GRAPH));
-        out.printf("        b.push(JavaKind.%s, node);\n", getReturnKind(intrinsicMethod));
-        out.printf("        return true;\n");
-    }
-
-    @Override
-    protected void createHelpers(AbstractProcessor processor, PrintWriter out, InjectedDependencies deps) {
-        out.printf("\n");
-        out.printf("    @Override\n");
-        out.printf("    public boolean replace(GraphBuilderContext b, Replacements injection, Stamp stamp, NodeInputList<ValueNode> args) {\n");
-
-        List<? extends VariableElement> params = intrinsicMethod.getParameters();
-
-        int argCount = 0;
-        Object receiver;
-        if (intrinsicMethod.getModifiers().contains(Modifier.STATIC)) {
-            receiver = intrinsicMethod.getEnclosingElement();
-        } else {
-            receiver = "arg0";
-            TypeElement type = (TypeElement) intrinsicMethod.getEnclosingElement();
-            constantArgument(processor, out, deps, argCount, type.asType(), argCount, true);
-            argCount++;
-        }
-
-        int firstArg = argCount;
-        for (VariableElement param : params) {
-            if (processor.getAnnotation(param, processor.getType(INJECTED_PARAMETER_CLASS_NAME)) == null) {
-                constantArgument(processor, out, deps, argCount, param.asType(), argCount, true);
-            } else {
-                out.printf("        assert args.get(%d).isNullConstant() : \"Must be null constant \" + args.get(%d);\n", argCount, argCount);
+                out.printf("        assert args[%d].isNullConstant() : \"Must be null constant \" + args[%d];\n", argCount, argCount);
                 out.printf("        %s arg%d = %s;\n", param.asType(), argCount, deps.find(processor, (DeclaredType) param.asType()).getExpression(processor, intrinsicMethod));
             }
             argCount++;
@@ -270,6 +179,28 @@ public class GeneratedFoldPlugin extends GeneratedPlugin {
                         deps.use(processor, WellKnownDependency.STRUCTURED_GRAPH));
         out.printf("        b.push(JavaKind.%s, node);\n", getReturnKind(intrinsicMethod));
         out.printf("        return true;\n");
+    }
+
+    @Override
+    protected void createPrivateMembersAndConstructor(AbstractProcessor processor, PrintWriter out, InjectedDependencies deps, String constructorName) {
+        // The replaceFunction needs a SnippetReflectionProvider
+        deps.use(processor, WellKnownDependency.SNIPPET_REFLECTION);
+        super.createPrivateMembersAndConstructor(processor, out, deps, constructorName);
+
+        out.printf("\n");
+        out.printf("    @SuppressWarnings(\"unused\")\n");
+        out.printf("    static boolean replaceFunction(GraphBuilderContext b, GeneratedPluginInjectionProvider injection, ValueNode[] args) {\n");
+        InjectedDependencies replaceDeps = new InjectedDependencies(false, intrinsicMethod);
+        emitReplace(processor, out, replaceDeps);
+        out.printf("    }\n");
+    }
+
+    @Override
+    protected void createHelpers(AbstractProcessor processor, PrintWriter out, InjectedDependencies deps) {
+        out.printf("\n");
+        out.printf("    @Override\n");
+        out.printf("    public boolean replace(GraphBuilderContext b, GeneratedPluginInjectionProvider injection, ValueNode[] args) {\n");
+        out.printf("        return %s.replaceFunction(b, injection, args);\n", getPluginName());
         out.printf("    }\n");
     }
 }
