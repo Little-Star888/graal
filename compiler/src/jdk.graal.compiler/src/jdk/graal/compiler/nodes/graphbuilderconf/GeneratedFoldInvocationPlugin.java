@@ -24,6 +24,7 @@
  */
 package jdk.graal.compiler.nodes.graphbuilderconf;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
 import jdk.graal.compiler.api.replacements.Fold;
@@ -35,5 +36,10 @@ public abstract class GeneratedFoldInvocationPlugin extends GeneratedInvocationP
 
     public GeneratedFoldInvocationPlugin(String name, Type... argumentTypes) {
         super(name, argumentTypes);
+    }
+
+    @Override
+    public final Class<? extends Annotation> getSource() {
+        return Fold.class;
     }
 }

@@ -24,9 +24,11 @@
  */
 package jdk.graal.compiler.nodes.graphbuilderconf;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
 import jdk.graal.compiler.core.common.spi.ForeignCallDescriptor;
+import jdk.graal.compiler.graph.Node;
 import jdk.vm.ci.meta.MetaAccessProvider;
 import jdk.vm.ci.meta.ResolvedJavaMethod;
 import jdk.vm.ci.meta.ResolvedJavaType;
@@ -39,6 +41,11 @@ public abstract class GeneratedNodeIntrinsicInvocationPlugin extends GeneratedIn
 
     public GeneratedNodeIntrinsicInvocationPlugin(String name, Type... argumentTypes) {
         super(name, argumentTypes);
+    }
+
+    @Override
+    public final Class<? extends Annotation> getSource() {
+        return Node.NodeIntrinsic.class;
     }
 
     protected boolean verifyForeignCallDescriptor(GraphBuilderTool b, ResolvedJavaMethod targetMethod, ForeignCallDescriptor descriptor) {

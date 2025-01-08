@@ -79,7 +79,7 @@ public abstract class GeneratedNodeIntrinsicPlugin extends GeneratedPlugin {
                 break;
             }
 
-            out.printf("        %s arg%d = %s;\n", param.asType(), idx, deps.inject(processor, (DeclaredType) param.asType()));
+            out.printf("        %s arg%d = %s;\n", param.asType(), idx, deps.use(processor, (DeclaredType) param.asType()));
         }
 
         for (int i = 0; i < signature.length; i++, idx++) {
@@ -196,7 +196,7 @@ public abstract class GeneratedNodeIntrinsicPlugin extends GeneratedPlugin {
     }
 
     @Override
-    protected void createOtherClasses(AbstractProcessor processor, PrintWriter out) {
+    protected void createOtherClasses(AbstractProcessor processor, PrintWriter out, InjectedDependencies deps) {
         if (needsReplacement(processor)) {
             if (isWithExceptionReplacement(processor)) {
                 /*
@@ -209,11 +209,10 @@ public abstract class GeneratedNodeIntrinsicPlugin extends GeneratedPlugin {
                 out.printf("@ExcludeFromJacocoGeneratedReport(\"deferred plugin support that is only called in libgraal\")\n");
                 out.printf("final class %s implements PluginReplacementWithExceptionNode.ReplacementWithExceptionFunction {\n", name);
                 out.printf("    static PluginReplacementWithExceptionNode.ReplacementWithExceptionFunction FUNCTION = new %s();\n", name);
-                InjectedDependencies deps = new InjectedDependencies(false, intrinsicMethod);
                 createHelpers(processor, out, deps);
                 out.printf("}\n");
             } else {
-                super.createOtherClasses(processor, out);
+                super.createOtherClasses(processor, out, deps);
             }
         }
     }
@@ -238,10 +237,12 @@ public abstract class GeneratedNodeIntrinsicPlugin extends GeneratedPlugin {
     }
 
     @Override
-    protected void createHelpers(AbstractProcessor processor, PrintWriter out, InjectedDependencies deps) {
+    protected void createHelpers(AbstractProcessor processor, PrintWriter out, InjectedDependencies originalDeps) {
         if (!needsReplacement(processor)) {
             return;
         }
+        // In this context all values must be retrieved from the injection argument
+        InjectedDependencies deps = new InjectedDependencies(false, intrinsicMethod);
         out.printf("\n");
         out.printf("    @Override\n");
         out.printf("    public boolean replace(GraphBuilderContext b, GeneratedPluginInjectionProvider injection, ValueNode[] args) {\n");

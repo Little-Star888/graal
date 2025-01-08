@@ -28,6 +28,7 @@ import static jdk.graal.compiler.replacements.processor.FoldHandler.FOLD_CLASS_N
 import static jdk.graal.compiler.replacements.processor.FoldHandler.INJECTED_PARAMETER_CLASS_NAME;
 
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -85,7 +86,15 @@ public class GeneratedFoldPlugin extends GeneratedPlugin {
             argCount++;
         }
 
-        out.printf("        return replaceFunction(b, injection, args);\n");
+        // Exercise the emission (but swallow generated output) to populate the deps
+        emitReplace(processor, new PrintWriter(new StringWriter()), deps);
+
+        // Build the list of extra arguments to be passed
+        StringBuilder extraArguments = new StringBuilder();
+        for (InjectedDependencies.Dependency dep : deps) {
+            extraArguments.append(", ").append(dep.getName(processor, intrinsicMethod));
+        }
+        out.printf("        return doExecute(b, args%s);\n", extraArguments);
     }
 
     private void emitReplace(AbstractProcessor processor, PrintWriter out, InjectedDependencies deps) {
@@ -106,7 +115,7 @@ public class GeneratedFoldPlugin extends GeneratedPlugin {
                 constantArgument(processor, out, deps, argCount, param.asType(), argCount, false);
             } else {
                 out.printf("        assert args[%d].isNullConstant() : \"Must be null constant \" + args[%d];\n", argCount, argCount);
-                out.printf("        %s arg%d = %s;\n", param.asType(), argCount, deps.find(processor, (DeclaredType) param.asType()).getExpression(processor, intrinsicMethod));
+                out.printf("        %s arg%d = %s;\n", param.asType(), argCount, deps.use(processor, (DeclaredType) param.asType()));
             }
             argCount++;
         }
@@ -183,16 +192,20 @@ public class GeneratedFoldPlugin extends GeneratedPlugin {
 
     @Override
     protected void createPrivateMembersAndConstructor(AbstractProcessor processor, PrintWriter out, InjectedDependencies deps, String constructorName) {
-        // The replaceFunction needs a SnippetReflectionProvider
-        deps.use(processor, WellKnownDependency.SNIPPET_REFLECTION);
-        super.createPrivateMembersAndConstructor(processor, out, deps, constructorName);
-
+        // Add declarations for the extra arguments
+        StringBuilder extraArguments = new StringBuilder();
+        for (InjectedDependencies.Dependency dep : deps) {
+            extraArguments.append(", ").append(dep.getType()).append(" ").append(dep.getName(processor, intrinsicMethod));
+        }
         out.printf("\n");
         out.printf("    @SuppressWarnings(\"unused\")\n");
-        out.printf("    static boolean replaceFunction(GraphBuilderContext b, GeneratedPluginInjectionProvider injection, ValueNode[] args) {\n");
-        InjectedDependencies replaceDeps = new InjectedDependencies(false, intrinsicMethod);
-        emitReplace(processor, out, replaceDeps);
+        out.printf("    static boolean doExecute(GraphBuilderContext b, ValueNode[] args%s) {\n", extraArguments);
+        emitReplace(processor, out, deps);
         out.printf("    }\n");
+
+        // This must be done after the code emission above to ensure that deps includes all required
+        // dependencies.
+        super.createPrivateMembersAndConstructor(processor, out, deps, constructorName);
     }
 
     @Override
@@ -200,7 +213,18 @@ public class GeneratedFoldPlugin extends GeneratedPlugin {
         out.printf("\n");
         out.printf("    @Override\n");
         out.printf("    public boolean replace(GraphBuilderContext b, GeneratedPluginInjectionProvider injection, ValueNode[] args) {\n");
-        out.printf("        return %s.replaceFunction(b, injection, args);\n", getPluginName());
+
+        // Create local declarations for all the injected arguments
+        for (InjectedDependencies.Dependency dep : deps) {
+            out.printf("        %s %s = %s;\n", dep.getType(), dep.getName(processor, intrinsicMethod), dep.getExpression(processor, intrinsicMethod));
+        }
+
+        // Build the list of extra arguments to be passed
+        StringBuilder extraArguments = new StringBuilder();
+        for (InjectedDependencies.Dependency dep : deps) {
+            extraArguments.append(", ").append(dep.getName(processor, intrinsicMethod));
+        }
+        out.printf("        return %s.doExecute(b, args%s);\n", getPluginName(), extraArguments);
         out.printf("    }\n");
     }
 }
