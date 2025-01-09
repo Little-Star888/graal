@@ -424,14 +424,16 @@ public class ProgressReporter implements FeatureSingleton, UnsavedSingleton {
         recordJsonMetric(ResourceUsageKey.MEMORY_TOTAL, totalMemorySize);
 
         List<String> inputArguments = ManagementFactory.getRuntimeMXBean().getInputArguments();
-        List<String> maxRAMPrecentageValues = inputArguments.stream().filter(arg -> arg.startsWith("-XX:MaxRAMPercentage")).toList();
-        String maxHeapSuffix = "determined at start";
-        if (maxRAMPrecentageValues.size() > 1) { // The driver sets this option once
-            maxHeapSuffix = "set via '%s'".formatted(maxRAMPrecentageValues.get(maxRAMPrecentageValues.size() - 1));
+        List<String> maxRAMPercentageValues = inputArguments.stream().filter(arg -> arg.startsWith("-XX:MaxRAMPercentage=") || arg.startsWith("-XX:MaximumHeapSizePercent=")).toList();
+        String memoryUsageReason = "unknown";
+        if (maxRAMPercentageValues.size() == 1) { // The driver sets one of these options once
+            memoryUsageReason = System.getProperty(SubstrateOptions.BUILD_MEMORY_USAGE_REASON_TEXT_PROPERTY, "unknown");
+        } else if (maxRAMPercentageValues.size() > 1) {
+            memoryUsageReason = "set via '%s'".formatted(maxRAMPercentageValues.getLast());
         }
         String xmxValueOrNull = inputArguments.stream().filter(arg -> arg.startsWith("-Xmx")).reduce((first, second) -> second).orElse(null);
         if (xmxValueOrNull != null) { // -Xmx takes precedence over -XX:MaxRAMPercentage
-            maxHeapSuffix = "set via '%s'".formatted(xmxValueOrNull);
+            memoryUsageReason = "set via '%s'".formatted(xmxValueOrNull);
         }
 
         int maxNumberOfThreads = NativeImageOptions.getActualNumberOfThreads();
@@ -445,8 +447,7 @@ public class ProgressReporter implements FeatureSingleton, UnsavedSingleton {
 
         l().printLineSeparator();
         l().yellowBold().doclink("Build resources", "#glossary-build-resources").a(":").reset().println();
-        l().a(" - %.2fGB of memory (%.1f%% of %.2fGB system memory, %s)",
-                        ByteFormattingUtil.bytesToGiB(maxMemory), Utils.toPercentage(maxMemory, totalMemorySize), ByteFormattingUtil.bytesToGiB(totalMemorySize), maxHeapSuffix).println();
+        l().a(" - %.2fGB of memory (%.1f%% of system memory, reason: %s)", ByteFormattingUtil.bytesToGiB(maxMemory), Utils.toPercentage(maxMemory, totalMemorySize), memoryUsageReason).println();
         l().a(" - %s thread(s) (%.1f%% of %s available processor(s), %s)",
                         maxNumberOfThreads, Utils.toPercentage(maxNumberOfThreads, availableProcessors), availableProcessors, maxNumberOfThreadsSuffix).println();
     }
