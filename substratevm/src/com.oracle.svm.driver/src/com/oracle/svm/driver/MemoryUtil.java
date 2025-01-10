@@ -57,7 +57,7 @@ class MemoryUtil {
     private static final double DEDICATED_MODE_TOTAL_MEMORY_RATIO = 0.85D;
 
     /* If available memory is below 8GiB, fall back to dedicated mode. */
-    private static final long MIN_AVAILABLE_MEMORY_THRESHOLD = 8L * GiB_TO_BYTES;
+    private static final int MIN_AVAILABLE_MEMORY_THRESHOLD_GB = 8;
 
     /*
      * Builder uses at most 32GB to avoid disabling compressed oops (UseCompressedOops).
@@ -113,7 +113,7 @@ class MemoryUtil {
         final boolean isDedicatedMemoryUsage;
         if (SubstrateUtil.isCISet()) {
             isDedicatedMemoryUsage = true;
-            memoryUsageReason = "$CI set";
+            memoryUsageReason = "$CI=true";
         } else if (isContainerized()) {
             isDedicatedMemoryUsage = true;
             memoryUsageReason = "in container";
@@ -126,10 +126,10 @@ class MemoryUtil {
             reasonableMaxMemorySize = dedicatedMemorySize;
         } else {
             reasonableMaxMemorySize = getAvailableMemorySize();
-            if (reasonableMaxMemorySize >= MIN_AVAILABLE_MEMORY_THRESHOLD) {
-                memoryUsageReason = "enough available";
+            if (reasonableMaxMemorySize >= MIN_AVAILABLE_MEMORY_THRESHOLD_GB * GiB_TO_BYTES) {
+                memoryUsageReason = "using available memory";
             } else { // fall back to dedicated mode
-                memoryUsageReason = "not enough available";
+                memoryUsageReason = "less than " + MIN_AVAILABLE_MEMORY_THRESHOLD_GB + "GB of memory available";
                 reasonableMaxMemorySize = dedicatedMemorySize;
             }
         }
