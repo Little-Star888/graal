@@ -447,7 +447,7 @@ public class ProgressReporter implements FeatureSingleton, UnsavedSingleton {
 
         l().printLineSeparator();
         l().yellowBold().doclink("Build resources", "#glossary-build-resources").a(":").reset().println();
-        l().a(" - %.2fGB of memory (%.1f%% of system memory, reason: %s)", ByteFormattingUtil.bytesToGiB(maxMemory), Utils.toPercentage(maxMemory, totalMemorySize), memoryUsageReason).println();
+        l().a(" - %s of memory (%.1f%% of system memory, reason: %s)", ByteFormattingUtil.bytesToHuman(maxMemory), Utils.toPercentage(maxMemory, totalMemorySize), memoryUsageReason).println();
         l().a(" - %s thread(s) (%.1f%% of %s available processor(s), %s)",
                         maxNumberOfThreads, Utils.toPercentage(maxNumberOfThreads, availableProcessors), availableProcessors, maxNumberOfThreadsSuffix).println();
     }
@@ -838,7 +838,7 @@ public class ProgressReporter implements FeatureSingleton, UnsavedSingleton {
                         .doclink("GCs", "#glossary-garbage-collections");
         long peakRSS = ProgressReporterCHelper.getPeakRSS();
         if (peakRSS >= 0) {
-            p.a(" | ").doclink("Peak RSS", "#glossary-peak-rss").a(": ").a("%.2fGB", ByteFormattingUtil.bytesToGiB(peakRSS));
+            p.a(" | ").doclink("Peak RSS", "#glossary-peak-rss").a(": ").a(ByteFormattingUtil.bytesToHuman(peakRSS));
         }
         recordJsonMetric(ResourceUsageKey.PEAK_RSS, (peakRSS >= 0 ? peakRSS : UNAVAILABLE_METRIC));
         long processCPUTime = getOperatingSystemMXBean().getProcessCpuTime();
@@ -863,7 +863,7 @@ public class ProgressReporter implements FeatureSingleton, UnsavedSingleton {
                             .a(": %.1fs spent in %d GCs during the last stage, taking up %.2f%% of the time.",
                                             Utils.millisToSeconds(gcTimeDeltaMillis), currentGCStats.totalCount - lastGCStats.totalCount, ratio * 100)
                             .println();
-            l().a("            Please ensure more than %.2fGB of memory is available for Native Image", ByteFormattingUtil.bytesToGiB(ProgressReporterCHelper.getPeakRSS())).println();
+            l().a("            Please ensure more than %s of memory is available for Native Image", ByteFormattingUtil.bytesToHuman(ProgressReporterCHelper.getPeakRSS())).println();
             l().a("            to reduce GC overhead and improve image build time.").println();
         }
         lastGCStats = currentGCStats;
@@ -899,8 +899,8 @@ public class ProgressReporter implements FeatureSingleton, UnsavedSingleton {
             return nanos / NANOS_TO_SECONDS;
         }
 
-        private static double getUsedMemory() {
-            return ByteFormattingUtil.bytesToGiB(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
+        private static String getUsedMemory() {
+            return ByteFormattingUtil.bytesToHuman(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
         }
 
         private static String stringFilledWith(int size, String fill) {
@@ -1229,7 +1229,7 @@ public class ProgressReporter implements FeatureSingleton, UnsavedSingleton {
                 a("]").reset();
             }
 
-            String suffix = String.format("(%.1fs @ %.2fGB)", Utils.millisToSeconds(totalTime), Utils.getUsedMemory());
+            String suffix = String.format("(%.1fs @ %s)", Utils.millisToSeconds(totalTime), Utils.getUsedMemory());
             int textLength = getCurrentTextLength();
             // TODO: `assert textLength > 0;` should be used here but tests do not start stages
             // properly (GR-35721)
