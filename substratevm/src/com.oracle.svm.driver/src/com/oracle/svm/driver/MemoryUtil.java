@@ -37,8 +37,13 @@ import java.util.regex.Pattern;
 
 import com.oracle.svm.core.OS;
 import com.oracle.svm.core.SubstrateOptions;
+import com.oracle.svm.core.SubstrateUtil;
 import com.oracle.svm.core.util.ExitStatus;
+import com.oracle.svm.core.util.VMError;
 import com.oracle.svm.driver.NativeImage.NativeImageError;
+import com.oracle.svm.util.ReflectionUtil;
+
+import jdk.graal.compiler.serviceprovider.JavaVersionUtil;
 
 class MemoryUtil {
     private static final long KiB_TO_BYTES = 1024L;
@@ -106,7 +111,7 @@ class MemoryUtil {
 
         String memoryUsageReason = "unknown";
         final boolean isDedicatedMemoryUsage;
-        if ("true".equals(System.getenv("CI"))) {
+        if (SubstrateUtil.isCISet()) {
             isDedicatedMemoryUsage = true;
             memoryUsageReason = "$CI set";
         } else if (isContainerized()) {
@@ -146,10 +151,21 @@ class MemoryUtil {
 
     private static boolean isContainerized() {
         /*
-         * [GR-55515]: Using shouldInstrument() as a workaround only to access isContainerized().
-         * After dropping JDK 21, use jdk.jfr.internal.JVM.isContainerized() directly.
+         * [GR-55515]: Accessing isContainerized() reflectively for 21 JDK compatibility (non-static
+         * vs static method). After dropping JDK 21, use it directly.
          */
-        return jdk.jfr.internal.Utils.shouldInstrument(false, "");
+        var isContainerized = ReflectionUtil.lookupMethod(jdk.jfr.internal.JVM.class, "isContainerized");
+        try {
+            final Object receiver;
+            if (JavaVersionUtil.JAVA_SPEC == 21) { // non-static
+                receiver = ReflectionUtil.lookupField(jdk.jfr.internal.JVM.class, "jvm").get(null);
+            } else {
+                receiver = null; // static
+            }
+            return (boolean) isContainerized.invoke(receiver);
+        } catch (ReflectiveOperationException | ClassCastException e) {
+            throw VMError.shouldNotReachHere(e);
+        }
     }
 
     private static double getAvailableMemorySize() {

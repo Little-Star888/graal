@@ -112,7 +112,11 @@ public class SubstrateUtil {
     }
 
     public static boolean isRunningInCI() {
-        return !isTTY() || "true".equals(System.getenv("CI"));
+        return !isTTY() || isCISet();
+    }
+
+    public static boolean isCISet() {
+        return "true".equals(System.getenv("CI"));
     }
 
     /**

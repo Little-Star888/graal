@@ -144,7 +144,7 @@ The memory limit and number of threads used by the build process.
 
 More precisely, the memory limit of the Java heap, so actual memory consumption can be higher.
 Please check the [peak RSS](#glossary-peak-rss) reported at the end of the build to understand how much memory was actually used.
-By default, the build process will use up to 85% of system memory in containers or CI environments (when the `$CI` environment variable is set), but never more than 32GB of memory.
+By default, the build process will use up to 85% of system memory in containers or CI environments (when the `$CI` environment variable is set to `true`), but never more than 32GB of memory.
 Otherwise, it tries to use available memory to avoid memory pressure on developer machines.
 If less than 8GB of memory are available, the build process falls back to use 85% of system memory.
 Therefore, consider freeing up memory if your machine is slow during a build, for example, by closing applications that you do not need.
