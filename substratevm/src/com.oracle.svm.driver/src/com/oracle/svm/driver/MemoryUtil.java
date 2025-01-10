@@ -28,7 +28,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -146,19 +145,11 @@ class MemoryUtil {
     }
 
     private static boolean isContainerized() {
-        if (!OS.LINUX.isCurrent()) {
-            return false;
-        }
-        Path cgroupPath = Paths.get("/proc/self/cgroup");
-        if (!Files.exists(cgroupPath)) {
-            return false;
-        }
-        try {
-            return Files.readAllLines(cgroupPath).stream().anyMatch(
-                            s -> s.contains("docker") || s.contains("kubepods") || s.contains("containerd"));
-        } catch (Exception e) {
-        }
-        return false;
+        /*
+         * [GR-55515]: Using shouldInstrument() as a workaround only to access isContainerized().
+         * After dropping JDK 21, use jdk.jfr.internal.JVM.isContainerized() directly.
+         */
+        return jdk.jfr.internal.Utils.shouldInstrument(false, "");
     }
 
     private static double getAvailableMemorySize() {
