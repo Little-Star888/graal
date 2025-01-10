@@ -27,6 +27,7 @@ package com.oracle.svm.driver;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -65,6 +66,23 @@ class MemoryUtil {
      */
     private static final long MAX_HEAP_BYTES = 32_000_000_000L;
 
+    private static final Method IS_CONTAINERIZED_METHOD;
+    private static final Object IS_CONTAINERIZED_RECEIVER;
+
+    static {
+        IS_CONTAINERIZED_METHOD = ReflectionUtil.lookupMethod(jdk.jfr.internal.JVM.class, "isContainerized");
+        if (JavaVersionUtil.JAVA_SPEC == 21) { // non-static
+            var jvmField = ReflectionUtil.lookupField(jdk.jfr.internal.JVM.class, "jvm");
+            try {
+                IS_CONTAINERIZED_RECEIVER = jvmField.get(null);
+            } catch (IllegalAccessException e) {
+                throw VMError.shouldNotReachHere(e);
+            }
+        } else {
+            IS_CONTAINERIZED_RECEIVER = null; // static
+        }
+    }
+
     public static List<String> determineMemoryFlags(NativeImage.HostFlags hostFlags) {
         List<String> flags = new ArrayList<>();
         if (hostFlags.hasUseParallelGC()) {
@@ -77,9 +95,9 @@ class MemoryUtil {
          * -XX:InitialRAMPercentage or -Xms.
          */
         if (hostFlags.hasMaxRAMPercentage()) {
-            flags.addAll(determineReasonableMaxRAMPercentage(value -> "-XX:MaxRAMPercentage=" + value));
+            flags.addAll(determineMemoryUsageFlags(value -> "-XX:MaxRAMPercentage=" + value));
         } else if (hostFlags.hasMaximumHeapSizePercent()) {
-            flags.addAll(determineReasonableMaxRAMPercentage(value -> "-XX:MaximumHeapSizePercent=" + value.intValue()));
+            flags.addAll(determineMemoryUsageFlags(value -> "-XX:MaximumHeapSizePercent=" + value.intValue()));
         }
         if (hostFlags.hasGCTimeRatio()) {
             /*
@@ -98,13 +116,12 @@ class MemoryUtil {
     }
 
     /**
-     * Returns a percentage (0.0-100.0) to be used as a value for the -XX:MaxRAMPercentage or
-     * -XX:MaximumHeapSizePercent flags of the builder process. Dedicated mode uses a fixed
-     * percentage of total memory and is the default in containers. Shared mode tries to use
-     * available memory to reduce memory pressure on the host machine. Note that this method uses
-     * OperatingSystemMXBean, which is container-aware.
+     * Returns memory usage flags for the build process. Dedicated mode uses a fixed percentage of
+     * total memory and is the default in containers. Shared mode tries to use available memory to
+     * reduce memory pressure on the host machine. Note that this method uses OperatingSystemMXBean,
+     * which is container-aware.
      */
-    private static List<String> determineReasonableMaxRAMPercentage(Function<Double, String> toMemoryFlag) {
+    private static List<String> determineMemoryUsageFlags(Function<Double, String> toMemoryFlag) {
         var osBean = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
         final double totalMemorySize = osBean.getTotalMemorySize();
         final double dedicatedMemorySize = totalMemorySize * DEDICATED_MODE_TOTAL_MEMORY_RATIO;
@@ -151,18 +168,11 @@ class MemoryUtil {
 
     private static boolean isContainerized() {
         /*
-         * [GR-55515]: Accessing isContainerized() reflectively for 21 JDK compatibility (non-static
-         * vs static method). After dropping JDK 21, use it directly.
+         * [GR-55515]: Accessing isContainerized() reflectively only for 21 JDK compatibility
+         * (non-static vs static method). After dropping JDK 21, use it directly.
          */
-        var isContainerized = ReflectionUtil.lookupMethod(jdk.jfr.internal.JVM.class, "isContainerized");
         try {
-            final Object receiver;
-            if (JavaVersionUtil.JAVA_SPEC == 21) { // non-static
-                receiver = ReflectionUtil.lookupField(jdk.jfr.internal.JVM.class, "jvm").get(null);
-            } else {
-                receiver = null; // static
-            }
-            return (boolean) isContainerized.invoke(receiver);
+            return (boolean) IS_CONTAINERIZED_METHOD.invoke(IS_CONTAINERIZED_RECEIVER);
         } catch (ReflectiveOperationException | ClassCastException e) {
             throw VMError.shouldNotReachHere(e);
         }
