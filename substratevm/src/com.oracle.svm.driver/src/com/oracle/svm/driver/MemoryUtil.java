@@ -106,7 +106,7 @@ class MemoryUtil {
 
         String memoryUsageReason = "unknown";
         final boolean isDedicatedMemoryUsage;
-        if (System.getenv("CI") != null) {
+        if ("true".equals(System.getenv("CI"))) {
             isDedicatedMemoryUsage = true;
             memoryUsageReason = "$CI set";
         } else if (isContainerized()) {
