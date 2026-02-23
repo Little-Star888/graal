@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, 2024, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2020, 2020, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -23,21 +23,20 @@
  * questions.
  */
 
-package com.oracle.svm.core.option;
+package com.oracle.svm.shared.option;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+public interface APIOptionGroup {
+    String name();
 
-import jdk.graal.compiler.options.Option;
+    default String helpText() {
+        return "";
+    }
 
-/**
- * If an {@link Option} is additionally annotated with {@link OptionMigrationMessage}, the message
- * will be shown to guide users when the option is listed as experimental in the build output.
- */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD})
-public @interface OptionMigrationMessage {
-    String value();
+    default char valueSeparator() {
+        return '=';
+    }
+
+    default HostedOptionKey<ReplacingLocatableMultiOptionValue.DelimitedString> multiValueOption() {
+        return null;
+    }
 }

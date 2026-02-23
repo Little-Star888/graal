@@ -1387,6 +1387,7 @@ suite = {
             "dependencies": [
                 "sdk:NATIVEIMAGE",
                 "sdk:COLLECTIONS",
+                "compiler:GRAAL_OPTIONS",
             ],
             "requiresConcealed" : {
                 "java.base" : [
@@ -1984,6 +1985,7 @@ suite = {
             "distDependencies": [
                 "sdk:NATIVEIMAGE",
                 "sdk:COLLECTIONS",
+                "compiler:GRAAL_OPTIONS",
             ],
             "moduleInfo" : {
                 "name" : "org.graalvm.nativeimage.shared",

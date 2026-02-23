@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package com.oracle.svm.core.option;
+package com.oracle.svm.shared.option;
 
 import java.util.function.Consumer;
 
@@ -41,7 +41,7 @@ import jdk.graal.compiler.options.OptionKey;
  * Defines a hosted {@link Option} that is used during native image generation, in contrast to a
  * {@link RuntimeOptionKey runtime option}.
  *
- * @see com.oracle.svm.core.option
+ * See {@code com.oracle.svm.core.option}.
  */
 public class HostedOptionKey<T> extends OptionKey<T> implements SubstrateOptionKey<T> {
     private final Consumer<HostedOptionKey<T>> buildTimeValidation;

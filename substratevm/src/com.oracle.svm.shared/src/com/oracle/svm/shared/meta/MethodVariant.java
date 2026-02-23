@@ -22,11 +22,9 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package com.oracle.svm.common.meta;
+package com.oracle.svm.shared.meta;
 
 import java.util.Collection;
-
-import jdk.vm.ci.meta.ResolvedJavaMethod;
 
 /**
  * A method variant is an alternative implementation of the original Java method. This functionality
@@ -35,7 +33,7 @@ import jdk.vm.ci.meta.ResolvedJavaMethod;
  */
 public interface MethodVariant {
 
-    static boolean isOriginalMethod(ResolvedJavaMethod method) {
+    static boolean isOriginalMethod(Object method) {
         if (method instanceof MethodVariant methodVariant) {
             return methodVariant.isOriginalMethod();
         }

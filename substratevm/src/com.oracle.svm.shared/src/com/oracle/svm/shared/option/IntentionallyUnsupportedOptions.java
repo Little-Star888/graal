@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2021, 2021, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2021, 2021, Alibaba Group Holding Limited. All rights reserved.
+ * Copyright (c) 2025, 2026, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -23,17 +22,33 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+package com.oracle.svm.shared.option;
 
-package com.oracle.svm.common.option;
+import com.oracle.svm.shared.util.VMError;
 
-import jdk.graal.compiler.options.Option;
 import jdk.graal.compiler.options.OptionKey;
+import org.graalvm.collections.EconomicSet;
 
-public class CommonOptions {
+/**
+ * Native image uses its own mechanisms to handle certain options, resulting in some Graal options
+ * being completely unused in native image. Being unused results in the options being silently
+ * ignored if set by the user. All such options should be listed here so that the native image
+ * options processing can reject them as unsupported.
+ */
+public final class IntentionallyUnsupportedOptions {
 
-    @Option(help = "Show available options based on comma-separated option-types (allowed categories: User, Expert, Debug).")//
-    public static final OptionKey<String> PrintFlags = new OptionKey<>(null);
+    private static final EconomicSet<OptionKey<?>> unsupportedOptions = EconomicSet.create();
 
-    @Option(help = "Print extra help, if available, based on comma-separated option names. Pass * to show all options that contain extra help.")//
-    public static final OptionKey<String> PrintFlagsWithExtraHelp = new OptionKey<>(null);
+    public static void add(OptionKey<?> option) {
+        unsupportedOptions.add(option);
+    }
+
+    private IntentionallyUnsupportedOptions() {
+        throw new IllegalStateException("Should not be initialized");
+    }
+
+    public static boolean contains(OptionKey<?> optionKey) {
+        VMError.guarantee(!unsupportedOptions.isEmpty(), "No unsupported options set up");
+        return unsupportedOptions.contains(optionKey);
+    }
 }

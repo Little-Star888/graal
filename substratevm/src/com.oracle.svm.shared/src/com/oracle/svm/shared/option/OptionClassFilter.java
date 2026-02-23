@@ -22,10 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package com.oracle.svm.core.option;
-
-import jdk.graal.compiler.util.EconomicHashSet;
-import org.graalvm.collections.EconomicSet;
+package com.oracle.svm.shared.option;
 
 import java.util.LinkedHashSet;
 import java.util.Map;

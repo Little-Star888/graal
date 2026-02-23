@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2017, 2017, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2021, 2026, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2021, 2021, Alibaba Group Holding Limited. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,31 +23,13 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package com.oracle.svm.core.option;
 
-import org.graalvm.collections.EconomicMap;
-import org.graalvm.nativeimage.ImageSingletons;
+package com.oracle.svm.shared.option;
 
-import com.oracle.svm.shared.singletons.traits.BuiltinTraits.BuildtimeAccessOnly;
-import com.oracle.svm.shared.singletons.traits.BuiltinTraits.NoLayeredCallbacks;
-import com.oracle.svm.shared.singletons.traits.SingletonTraits;
+public class UnsupportedOptionClassException extends Exception {
+    private static final long serialVersionUID = -3105370072461246590L;
 
-import jdk.graal.compiler.options.OptionKey;
-import jdk.graal.compiler.options.OptionValues;
-
-/**
- * The singleton holder of hosted options.
- *
- * @see com.oracle.svm.core.option
- */
-@SingletonTraits(access = BuildtimeAccessOnly.class, layeredCallbacks = NoLayeredCallbacks.class)
-public class HostedOptionValues extends OptionValues {
-
-    public HostedOptionValues(EconomicMap<OptionKey<?>, Object> values) {
-        super(values);
-    }
-
-    public static OptionValues singleton() {
-        return ImageSingletons.lookup(HostedOptionValues.class);
+    public UnsupportedOptionClassException(String msg) {
+        super(msg);
     }
 }

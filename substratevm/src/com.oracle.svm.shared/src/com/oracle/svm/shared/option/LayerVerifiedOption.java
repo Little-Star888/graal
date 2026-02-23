@@ -23,7 +23,7 @@
  * questions.
  */
 
-package com.oracle.svm.core.option;
+package com.oracle.svm.shared.option;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Repeatable;

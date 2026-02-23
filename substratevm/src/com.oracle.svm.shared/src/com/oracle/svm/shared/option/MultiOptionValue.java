@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2021, 2026, Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 2021, 2021, Alibaba Group Holding Limited. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -23,13 +23,25 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+package com.oracle.svm.shared.option;
 
-package com.oracle.svm.common.option;
+import java.util.List;
+import java.util.Optional;
 
-public class UnsupportedOptionClassException extends Exception {
-    private static final long serialVersionUID = -3105370072461246590L;
+public interface MultiOptionValue<T> {
 
-    public UnsupportedOptionClassException(String msg) {
-        super(msg);
-    }
+    Class<T> getValueType();
+
+    String getDelimiter();
+
+    /**
+     * @return a list of option values, one for each place where the option is used.
+     */
+    List<T> values();
+
+    Optional<T> lastValue();
+
+    void valueUpdate(Object value);
+
+    MultiOptionValue<T> createCopy();
 }

@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2021, 2021, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2021, 2021, Alibaba Group Holding Limited. All rights reserved.
+ * Copyright (c) 2025, 2026, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -23,25 +22,19 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package com.oracle.svm.common.option;
+package com.oracle.svm.shared.meta;
 
-import java.util.List;
-import java.util.Optional;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public interface MultiOptionValue<T> {
-
-    Class<T> getValueType();
-
-    String getDelimiter();
-
-    /**
-     * @return a list of option values, one for each place where the option is used.
-     */
-    List<T> values();
-
-    Optional<T> lastValue();
-
-    void valueUpdate(Object value);
-
-    MultiOptionValue<T> createCopy();
+/**
+ * Verifies that annotated methods are always folded or intrinsified and that loads of the annotated
+ * field are always folded in run time code. This annotation doesn't influence the folding logic
+ * itself, it just ensures that the annotated methods fields are not present in the image.
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.FIELD})
+public @interface GuaranteeFolded {
 }
