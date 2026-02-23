@@ -25,7 +25,7 @@
  */
 package com.oracle.svm.common.option;
 
-import jdk.graal.compiler.debug.GraalError;
+import com.oracle.svm.shared.util.VMError;
 
 /// Support for parsing a raw string into an option name and an optional description of its origin.
 /// It assists simple provenance tracking across option parsing layers. The origin, if present,
@@ -48,9 +48,9 @@ public final class LocatableOption {
         int annotationIndex = rawOptionName.indexOf('@');
         if (annotationIndex != -1) {
             name = rawOptionName.substring(0, annotationIndex);
-            GraalError.guarantee(!name.isEmpty(), "LocatableOption requires option name");
+            VMError.guarantee(!name.isEmpty(), "LocatableOption requires option name");
             origin = rawOptionName.substring(annotationIndex + 1);
-            GraalError.guarantee(!origin.isEmpty(), "LocatableOption specified with origin annotation requires origin name");
+            VMError.guarantee(!origin.isEmpty(), "LocatableOption specified with origin annotation requires origin name");
         } else {
             name = rawOptionName;
             origin = null;
@@ -77,7 +77,7 @@ public final class LocatableOption {
         private LocatableOptionValue(Object value, String origin) {
             this.value = value;
             this.origin = origin;
-            GraalError.guarantee(origin == null || !origin.isEmpty(),
+            VMError.guarantee(origin == null || !origin.isEmpty(),
                             "LocatableOptionValue origin needs to be either null or origin name");
         }
 
