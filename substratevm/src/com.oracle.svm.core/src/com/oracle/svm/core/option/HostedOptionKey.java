@@ -31,8 +31,8 @@ import org.graalvm.nativeimage.ImageInfo;
 
 import com.oracle.svm.common.option.LocatableOption;
 import com.oracle.svm.common.option.MultiOptionValue;
-import com.oracle.svm.core.collections.EnumBitmask;
 import com.oracle.svm.shared.util.VMError;
+import com.oracle.svm.shared.collections.EnumBitmask;
 
 import jdk.graal.compiler.options.Option;
 import jdk.graal.compiler.options.OptionKey;
