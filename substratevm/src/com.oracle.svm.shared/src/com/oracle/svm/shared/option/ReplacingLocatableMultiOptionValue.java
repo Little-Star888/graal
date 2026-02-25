@@ -26,8 +26,6 @@ package com.oracle.svm.shared.option;
 
 import java.util.List;
 
-import com.oracle.svm.common.option.LocatableOption;
-import com.oracle.svm.common.option.MultiOptionValue;
 import com.oracle.svm.shared.util.VMError;
 
 /**

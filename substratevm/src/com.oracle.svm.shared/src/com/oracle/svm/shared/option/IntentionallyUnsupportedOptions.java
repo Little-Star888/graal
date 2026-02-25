@@ -24,10 +24,11 @@
  */
 package com.oracle.svm.shared.option;
 
+import org.graalvm.collections.EconomicSet;
+
 import com.oracle.svm.shared.util.VMError;
 
 import jdk.graal.compiler.options.OptionKey;
-import org.graalvm.collections.EconomicSet;
 
 /**
  * Native image uses its own mechanisms to handle certain options, resulting in some Graal options

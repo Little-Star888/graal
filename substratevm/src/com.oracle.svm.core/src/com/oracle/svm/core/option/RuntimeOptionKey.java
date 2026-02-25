@@ -40,6 +40,8 @@ import com.oracle.svm.core.SubstrateUtil;
 import com.oracle.svm.core.jdk.RuntimeSupport;
 import com.oracle.svm.guest.staging.Uninterruptible;
 import com.oracle.svm.shared.collections.EnumBitmask;
+import com.oracle.svm.shared.option.HostedOptionKey;
+import com.oracle.svm.shared.option.SubstrateOptionKey;
 import com.oracle.svm.shared.util.VMError;
 
 import jdk.graal.compiler.api.replacements.Fold;

@@ -29,17 +29,15 @@ import java.util.function.Consumer;
 import org.graalvm.collections.EconomicMap;
 import org.graalvm.nativeimage.ImageInfo;
 
-import com.oracle.svm.common.option.LocatableOption;
-import com.oracle.svm.common.option.MultiOptionValue;
-import com.oracle.svm.shared.util.VMError;
 import com.oracle.svm.shared.collections.EnumBitmask;
+import com.oracle.svm.shared.util.VMError;
 
 import jdk.graal.compiler.options.Option;
 import jdk.graal.compiler.options.OptionKey;
 
 /**
  * Defines a hosted {@link Option} that is used during native image generation, in contrast to a
- * {@link RuntimeOptionKey runtime option}.
+ * {@code RuntimeOptionKey runtime option}.
  *
  * See {@code com.oracle.svm.core.option}.
  */

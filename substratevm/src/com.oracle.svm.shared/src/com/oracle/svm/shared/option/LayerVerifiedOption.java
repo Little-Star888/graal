@@ -32,7 +32,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Use this annotation to mark image builder {@link HostedOptionKey}s and {@link RuntimeOptionKey}s
+ * Use this annotation to mark image builder {@link HostedOptionKey}s and {@code RuntimeOptionKey}s
  * that require layered image build compatibility checking. For example, if a {@code HostedOption}
  * set to value {@code A} in the previous layer is required to also be set to the same value in the
  * current layer, the respective option can use this annotation to enforce this requirement.

@@ -32,9 +32,9 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.oracle.svm.core.option.LocatableMultiOptionValue;
 import com.oracle.svm.core.util.UserError;
 import com.oracle.svm.hosted.NativeImageClassLoaderSupport;
+import com.oracle.svm.shared.option.LocatableMultiOptionValue;
 import com.oracle.svm.shared.util.StringUtil;
 
 public class IncludeOptionsSupport {
