@@ -29,6 +29,7 @@ import java.lang.module.ModuleFinder;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -44,8 +45,6 @@ import com.oracle.svm.core.option.SubstrateOptionsParser;
 import com.oracle.svm.core.util.UserError;
 import com.oracle.svm.shared.util.StringUtil;
 
-import jdk.graal.compiler.util.EconomicHashSet;
-
 public class OptionClassFilterBuilder {
     private final String javaIdentifier = "\\p{javaJavaIdentifierStart}\\p{javaJavaIdentifierPart}*";
     private final Pattern validOptionValue = Pattern.compile(javaIdentifier + "(\\." + javaIdentifier + ")*");
@@ -55,8 +54,8 @@ public class OptionClassFilterBuilder {
     private final HostedOptionKey<AccumulatingLocatableMultiOptionValue.Strings> pathsOption;
     private final Map<URI, Module> uriModuleMap;
 
-    protected final Map<String, EconomicHashSet<OptionOrigin>> requireCompletePackageOrClass = new HashMap<>();
-    private final EconomicSet<Module> requireCompleteModules = EconomicSet.create();
+    protected final Map<String, LinkedHashSet<OptionOrigin>> requireCompletePackageOrClass = new HashMap<>();
+    private final LinkedHashSet<Module> requireCompleteModules = new LinkedHashSet<>();
     private boolean requireCompleteAll;
 
     public static OptionClassFilter createFilter(ImageClassLoader imageClassLoader, HostedOptionKey<AccumulatingLocatableMultiOptionValue.Strings> baseOption,
@@ -101,7 +100,7 @@ public class OptionClassFilterBuilder {
                         throw UserError.abort("Option '%s' provided by %s contains '%s'. No such package or class name found in '%s'.",
                                         SubstrateOptionsParser.commandArgument(baseOption, value), origin, entry, container);
                     }
-                    requireCompletePackageOrClass.computeIfAbsent(entry, _ -> new EconomicHashSet<>()).add(origin);
+                    requireCompletePackageOrClass.computeIfAbsent(entry, _ -> new LinkedHashSet<>()).add(origin);
                 } else {
                     throw UserError.abort("Entry '%s' in option '%s' provided by %s is neither a package nor a fully qualified classname.",
                                     entry, SubstrateOptionsParser.commandArgument(baseOption, value), origin);
@@ -127,7 +126,7 @@ public class OptionClassFilterBuilder {
                                 SubstrateOptionsParser.commandArgument(pathsOption, value), origin, pathStr);
             }
             for (String pkg : packages) {
-                EconomicHashSet<OptionOrigin> set = new EconomicHashSet<>();
+                LinkedHashSet<OptionOrigin> set = new LinkedHashSet<>();
                 set.add(origin);
                 requireCompletePackageOrClass.put(pkg, set);
             }
