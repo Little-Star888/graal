@@ -33,10 +33,8 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import jdk.graal.compiler.util.EconomicHashSet;
 import org.graalvm.collections.EconomicSet;
 
-import com.oracle.svm.core.SubstrateUtil;
 import com.oracle.svm.core.option.AccumulatingLocatableMultiOptionValue;
 import com.oracle.svm.core.option.HostedOptionKey;
 import com.oracle.svm.core.option.OptionClassFilter;
@@ -44,6 +42,9 @@ import com.oracle.svm.core.option.OptionOrigin;
 import com.oracle.svm.core.option.OptionUtils;
 import com.oracle.svm.core.option.SubstrateOptionsParser;
 import com.oracle.svm.core.util.UserError;
+import com.oracle.svm.shared.util.StringUtil;
+
+import jdk.graal.compiler.util.EconomicHashSet;
 
 public class OptionClassFilterBuilder {
     private final String javaIdentifier = "\\p{javaJavaIdentifierStart}\\p{javaJavaIdentifierPart}*";
@@ -118,7 +119,7 @@ public class OptionClassFilterBuilder {
             throw UserError.abort("Using '%s' requires directory or jar-file path arguments.",
                             SubstrateOptionsParser.commandArgument(pathsOption, value), origin);
         }
-        for (String pathStr : SubstrateUtil.split(value, File.pathSeparator)) {
+        for (String pathStr : StringUtil.split(value, File.pathSeparator)) {
             Path path = Path.of(pathStr);
             EconomicSet<String> packages = imageClassLoader.packages(path.toAbsolutePath().normalize().toUri());
             if (imageClassLoader.noEntryForURI(packages)) {

@@ -533,7 +533,7 @@ public class NativeImage {
                     while (inputScanner.hasNextLine()) {
                         String line = inputScanner.nextLine();
                         if (line.contains("bool UseJVMCINativeLibrary ")) {
-                            String value = SubstrateUtil.split(line, "=")[1];
+                            String value = StringUtil.split(line, "=")[1];
                             if (value.trim().startsWith("true")) {
                                 useJVMCINativeLibrary = true;
                             }
@@ -2151,11 +2151,11 @@ public class NativeImage {
     }
 
     public void addAddedModules(String addModulesArg) {
-        addModules.addAll(Arrays.asList(SubstrateUtil.split(addModulesArg, ",")));
+        addModules.addAll(Arrays.asList(StringUtil.split(addModulesArg, ",")));
     }
 
     public void addLimitedModules(String limitModulesArg) {
-        limitModules.addAll(Arrays.asList(SubstrateUtil.split(limitModulesArg, ",")));
+        limitModules.addAll(Arrays.asList(StringUtil.split(limitModulesArg, ",")));
     }
 
     void addImageProvidedJars(Path path) {

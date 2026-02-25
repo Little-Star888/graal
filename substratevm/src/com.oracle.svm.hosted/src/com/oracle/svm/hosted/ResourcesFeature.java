@@ -73,7 +73,6 @@ import com.oracle.svm.core.ClassLoaderSupport.ResourceCollector;
 import com.oracle.svm.core.MissingRegistrationUtils;
 import com.oracle.svm.core.ParsingReason;
 import com.oracle.svm.core.SubstrateOptions;
-import com.oracle.svm.core.SubstrateUtil;
 import com.oracle.svm.core.configure.ConfigurationFiles;
 import com.oracle.svm.core.feature.AutomaticallyRegisteredFeature;
 import com.oracle.svm.core.feature.InternalFeature;
@@ -99,11 +98,12 @@ import com.oracle.svm.hosted.reflect.NativeImageConditionResolver;
 import com.oracle.svm.hosted.snippets.SubstrateGraphBuilderPlugins;
 import com.oracle.svm.hosted.util.ResourcesUtils;
 import com.oracle.svm.shared.util.ModuleSupport;
+import com.oracle.svm.shared.util.ReflectionUtil;
+import com.oracle.svm.shared.util.StringUtil;
 import com.oracle.svm.shared.util.VMError;
 import com.oracle.svm.util.GlobUtils;
 import com.oracle.svm.util.LogUtils;
 import com.oracle.svm.util.NativeImageResourcePathRepresentation;
-import com.oracle.svm.shared.util.ReflectionUtil;
 
 import jdk.graal.compiler.nodes.ValueNode;
 import jdk.graal.compiler.nodes.graphbuilderconf.GraphBuilderConfiguration;
@@ -627,7 +627,7 @@ public class ResourcesFeature implements InternalFeature {
     }
 
     private static Optional<ResourcePattern> makeResourcePattern(String rawPattern, Object origin) {
-        String[] moduleNameWithPattern = SubstrateUtil.split(rawPattern, ":", 2);
+        String[] moduleNameWithPattern = StringUtil.split(rawPattern, ":", 2);
         try {
             if (moduleNameWithPattern.length < 2) {
                 return Optional.of(new ResourcePattern(null, Pattern.compile(moduleNameWithPattern[0])));

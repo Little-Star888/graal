@@ -49,7 +49,6 @@ import com.oracle.svm.configure.config.ConfigurationMemberInfo;
 import com.oracle.svm.configure.config.ConfigurationSet;
 import com.oracle.svm.configure.config.ConfigurationType;
 import com.oracle.svm.core.AlwaysInline;
-import com.oracle.svm.core.SubstrateUtil;
 import com.oracle.svm.core.feature.AutomaticallyRegisteredFeature;
 import com.oracle.svm.core.feature.InternalFeature;
 import com.oracle.svm.core.imagelayer.ImageLayerBuildingSupport;
@@ -66,6 +65,7 @@ import com.oracle.svm.shared.singletons.traits.BuiltinTraits.Disallowed;
 import com.oracle.svm.shared.singletons.traits.BuiltinTraits.NoLayeredCallbacks;
 import com.oracle.svm.shared.singletons.traits.BuiltinTraits.SingleLayer;
 import com.oracle.svm.shared.singletons.traits.SingletonTraits;
+import com.oracle.svm.shared.util.StringUtil;
 import com.oracle.svm.shared.util.VMError;
 
 import jdk.graal.compiler.options.Option;
@@ -565,7 +565,7 @@ record TraceOptions(Path path, boolean merge, Path debugLog) {
         Map<String, String> parsedArguments = new HashMap<>();
         Set<String> allArguments = new LinkedHashSet<>(List.of("path", "merge", "debug-log"));
         for (String argument : traceMetadataValue.split(",")) {
-            String[] parts = SubstrateUtil.split(argument, "=", ARGUMENT_PARTS);
+            String[] parts = StringUtil.split(argument, "=", ARGUMENT_PARTS);
             if (parts.length != ARGUMENT_PARTS) {
                 throw badArgumentError(argument, "Argument should be a key-value pair separated by '='");
             } else if (!allArguments.contains(parts[0])) {
