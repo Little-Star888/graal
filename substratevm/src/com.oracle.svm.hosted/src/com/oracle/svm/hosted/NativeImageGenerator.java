@@ -1965,7 +1965,14 @@ public class NativeImageGenerator {
                     "java.awt.Cursor.DOT_HOTSPOT_SUFFIX",
                     "sun.lwawt.macosx.CCustomCursor.fHotspot",
                     "sun.lwawt.macosx.CCustomCursor.getHotSpot()",
-                    "sun.awt.shell.Win32ShellFolder2.ATTRIB_GHOSTED");
+                    "sun.awt.shell.Win32ShellFolder2.ATTRIB_GHOSTED",
+                    /*
+                     * Hosted options live in com.oracle.svm.shared but are folded at image build
+                     * time. This should go away once with have a guest-level folding mechanism
+                     * (GR-73653).
+                     */
+                    "com.oracle.svm.shared.option.HostedOptionKey.getValue()",
+                    "com.oracle.svm.shared.option.HostedOptionKey.hasBeenSet()");
 
     private static void checkName(BigBang bb, AnalysisMethod method, String name) {
         /*
