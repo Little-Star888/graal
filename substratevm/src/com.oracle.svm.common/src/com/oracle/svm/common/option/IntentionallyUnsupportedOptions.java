@@ -24,8 +24,8 @@
  */
 package com.oracle.svm.common.option;
 
-import jdk.graal.compiler.core.common.util.CompilationAlarm;
-import jdk.graal.compiler.hotspot.CompilerConfigurationFactory;
+import com.oracle.svm.shared.util.VMError;
+
 import jdk.graal.compiler.options.OptionKey;
 import org.graalvm.collections.EconomicSet;
 
@@ -39,9 +39,8 @@ public final class IntentionallyUnsupportedOptions {
 
     private static final EconomicSet<OptionKey<?>> unsupportedOptions = EconomicSet.create();
 
-    static {
-        unsupportedOptions.add(CompilerConfigurationFactory.Options.CompilerConfiguration);
-        unsupportedOptions.add(CompilationAlarm.Options.CompilationNoProgressPeriod);
+    public static void add(OptionKey<?> option) {
+        unsupportedOptions.add(option);
     }
 
     private IntentionallyUnsupportedOptions() {
@@ -49,6 +48,7 @@ public final class IntentionallyUnsupportedOptions {
     }
 
     public static boolean contains(OptionKey<?> optionKey) {
+        VMError.guarantee(!unsupportedOptions.isEmpty(), "No unsupported options set up");
         return unsupportedOptions.contains(optionKey);
     }
 }

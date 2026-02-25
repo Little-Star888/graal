@@ -43,7 +43,13 @@ import com.oracle.svm.core.option.RuntimeOptionKey;
 import com.oracle.svm.core.option.SubstrateOptionsParser;
 import com.oracle.svm.core.util.InterruptImageBuilding;
 import com.oracle.svm.core.util.UserError;
+import com.oracle.svm.shared.options.CommonOptionParser.OptionParseResult;
+import com.oracle.svm.shared.options.HostedOptionKey;
+import com.oracle.svm.shared.options.IntentionallyUnsupportedOptions;
+import com.oracle.svm.shared.options.SubstrateOptionsParser;
 
+import jdk.graal.compiler.core.common.util.CompilationAlarm;
+import jdk.graal.compiler.hotspot.CompilerConfigurationFactory;
 import jdk.graal.compiler.options.OptionDescriptor;
 import jdk.graal.compiler.options.OptionDescriptors;
 import jdk.graal.compiler.options.OptionKey;
@@ -72,6 +78,11 @@ public class HostedOptionParser implements HostedOptionProvider {
 
     public static void collectOptions(Iterable<OptionDescriptors> optionDescriptors, EconomicMap<String, OptionDescriptor> allHostedOptions,
                     EconomicMap<String, OptionDescriptor> allRuntimeOptions) {
+
+        // setup IntentionallyUnsupportedOptions
+        IntentionallyUnsupportedOptions.add(CompilerConfigurationFactory.Options.CompilerConfiguration);
+        IntentionallyUnsupportedOptions.add(CompilationAlarm.Options.CompilationNoProgressPeriod);
+
         SubstrateOptionsParser.collectOptions(optionDescriptors, descriptor -> {
             String name = descriptor.getName();
 
