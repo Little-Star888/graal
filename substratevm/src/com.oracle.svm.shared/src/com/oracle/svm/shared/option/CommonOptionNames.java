@@ -26,6 +26,10 @@
 
 package com.oracle.svm.shared.option;
 
+/**
+ * Collection of common option names handled in the driver. The actual {@link HostedOptionKey}
+ * instances are defined in {@code com.oracle.svm.core.option.CommonOptions}.
+ */
 public class CommonOptionNames {
     public static final String PrintFlags = "PrintFlags";
     public static final String PrintFlagsWithExtraHelp = "PrintFlagsWithExtraHelp";

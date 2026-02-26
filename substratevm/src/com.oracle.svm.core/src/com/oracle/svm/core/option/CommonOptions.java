@@ -24,11 +24,16 @@
  * questions.
  */
 
-package com.oracle.svm.shared.option;
+package com.oracle.svm.core.option;
+
+import com.oracle.svm.shared.option.CommonOptionNames;
 
 import jdk.graal.compiler.options.Option;
 import jdk.graal.compiler.options.OptionKey;
 
+/**
+ * Common options handled in the driver. See usages of {@link CommonOptionNames}.
+ */
 public class CommonOptions {
 
     @Option(name = CommonOptionNames.PrintFlags, help = "Show available options based on comma-separated option-types (allowed categories: User, Expert, Debug).")//
