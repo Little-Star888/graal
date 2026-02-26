@@ -33,10 +33,10 @@
  * <ul>
  * <li>Hosted options: configure the native image generation, i.e., influence what is put into the
  * image and how the image is built. They are set using the prefix <b>-H:</b> on the command line.
- * Options are defined using fields of the class {@link com.oracle.svm.shared.option.HostedOptionKey}.
- * The option values are maintained by {@link com.oracle.svm.shared.option.HostedOptionValues}. The
- * most convenient access to the value of a hosted option is
- * {@link com.oracle.svm.shared.option.HostedOptionKey#getValue()}.
+ * Options are defined using fields of the class
+ * {@link com.oracle.svm.shared.option.HostedOptionKey}. The option values are maintained by
+ * {@link com.oracle.svm.shared.option.HostedOptionValues}. The most convenient access to the value
+ * of a hosted option is {@link com.oracle.svm.shared.option.HostedOptionKey#getValue()}.
  * <p>
  * Hosted options cannot be changed at run time. Instead they are guaranteed to be constant folded
  * in the image. This is implemented using the {@link jdk.graal.compiler.api.replacements.Fold}
