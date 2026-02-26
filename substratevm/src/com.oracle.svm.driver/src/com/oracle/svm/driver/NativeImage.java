@@ -103,7 +103,7 @@ import com.oracle.svm.hosted.NativeImageOptions;
 import com.oracle.svm.hosted.NativeImageSystemClassLoader;
 import com.oracle.svm.hosted.util.JDKArgsUtils;
 import com.oracle.svm.shared.option.BundleMember;
-import com.oracle.svm.shared.option.CommonOptions;
+import com.oracle.svm.shared.option.CommonOptionNames;
 import com.oracle.svm.shared.option.OptionOrigin;
 import com.oracle.svm.shared.option.OptionUtils;
 import com.oracle.svm.shared.util.LogUtils;
@@ -250,8 +250,8 @@ public class NativeImage {
     static final String oHEnabled = oH + "+";
     static final String oR = "-R:";
 
-    final String enablePrintFlags = CommonOptions.PrintFlags.getName();
-    final String enablePrintFlagsWithExtraHelp = CommonOptions.PrintFlagsWithExtraHelp.getName();
+    final String enablePrintFlags = CommonOptionNames.PrintFlags;
+    final String enablePrintFlagsWithExtraHelp = CommonOptionNames.PrintFlagsWithExtraHelp;
 
     private static <T> String oH(OptionKey<T> option) {
         return oH + option.getName() + "=";

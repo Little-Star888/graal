@@ -233,7 +233,7 @@ public class CommonOptionParser {
                     msg.append(' ').append(match.getName());
                 }
             }
-            msg.append(". Use ").append(optionPrefix).append(CommonOptions.PrintFlags.getName()).append("= to list all available options.");
+            msg.append(". Use ").append(optionPrefix).append(CommonOptionNames.PrintFlags).append("= to list all available options.");
             return OptionParseResult.optionUnrecognizedError(msg.toString());
         }
 
@@ -265,7 +265,7 @@ public class CommonOptionParser {
 
         optionKey.update(valuesMap, hostedOption ? LocatableOption.value(value, current.origin) : value);
 
-        if (CommonOptions.PrintFlags.getName().equals(optionName)) {
+        if (CommonOptionNames.PrintFlags.equals(optionName)) {
             String optionValue = (String) value;
             EnumSet<OptionType> selectedOptionTypes;
             if (optionValue.isEmpty()) {
@@ -288,7 +288,7 @@ public class CommonOptionParser {
             return OptionParseResult.printFlags(selectedOptionTypes);
         }
 
-        if (CommonOptions.PrintFlagsWithExtraHelp.getName().equals(optionName)) {
+        if (CommonOptionNames.PrintFlagsWithExtraHelp.equals(optionName)) {
             String optionValue = (String) value;
             String[] optionNames = StringUtil.split(optionValue, ",");
             EconomicSet<String> selectedOptionNames = EconomicSet.create();

@@ -26,14 +26,7 @@
 
 package com.oracle.svm.shared.option;
 
-import jdk.graal.compiler.options.Option;
-import jdk.graal.compiler.options.OptionKey;
-
-public class CommonOptions {
-
-    @Option(name = CommonOptionNames.PrintFlags, help = "Show available options based on comma-separated option-types (allowed categories: User, Expert, Debug).")//
-    public static final OptionKey<String> PrintFlags = new OptionKey<>(null);
-
-    @Option(name = CommonOptionNames.PrintFlagsWithExtraHelp, help = "Print extra help, if available, based on comma-separated option names. Pass * to show all options that contain extra help.")//
-    public static final OptionKey<String> PrintFlagsWithExtraHelp = new OptionKey<>(null);
+public class CommonOptionNames {
+    public static final String PrintFlags = "PrintFlags";
+    public static final String PrintFlagsWithExtraHelp = "PrintFlagsWithExtraHelp";
 }
