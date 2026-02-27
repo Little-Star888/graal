@@ -1920,6 +1920,7 @@ suite = {
                     "transitive org.graalvm.nativeimage.objectfile",
                     "transitive org.graalvm.nativeimage.pointsto",
                     "transitive org.graalvm.nativeimage.guest.staging",
+                    "transitive org.graalvm.nativeimage.shared",
                     "org.graalvm.collections",
                     "org.graalvm.truffle.compiler",
                     "org.graalvm.nativeimage.configure",
@@ -2453,7 +2454,8 @@ suite = {
                 "com.oracle.svm.configure",
             ],
             "distDependencies": [
-                "NATIVE_IMAGE_BASE"
+                "NATIVE_IMAGE_BASE",
+                "SVM_SHARED",
             ],
             "moduleInfo" : {
                 "name" : "org.graalvm.nativeimage.configure",
@@ -2618,6 +2620,7 @@ suite = {
             "distDependencies": [
                 "compiler:GRAAL",
                 "NATIVE_IMAGE_BASE",
+                "SVM_SHARED",
                 "POINTSTO",
                 "compiler:HOSTVMACCESS"
             ],
@@ -2850,6 +2853,11 @@ suite = {
                 "name" : "org.graalvm.nativeimage.llvm",
                 "exports" : [
                     "* to org.graalvm.nativeimage.builder,org.graalvm.nativeimage.base",
+                ],
+                "requires" : [
+                    "transitive org.graalvm.nativeimage.builder",
+                    "transitive jdk.graal.compiler",
+                    "transitive org.graalvm.collections",
                 ],
             },
             "maven" : False,
