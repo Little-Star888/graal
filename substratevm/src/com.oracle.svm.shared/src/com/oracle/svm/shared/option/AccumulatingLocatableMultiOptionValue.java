@@ -22,13 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package com.oracle.svm.core.option;
+package com.oracle.svm.shared.option;
 
 import java.nio.file.Path;
 import java.util.List;
 
-import com.oracle.svm.common.option.LocatableOption;
-import com.oracle.svm.common.option.MultiOptionValue;
 import com.oracle.svm.shared.util.VMError;
 
 public abstract class AccumulatingLocatableMultiOptionValue<T> extends LocatableMultiOptionValue<T> {

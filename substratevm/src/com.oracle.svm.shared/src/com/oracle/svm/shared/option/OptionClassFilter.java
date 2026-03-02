@@ -22,23 +22,21 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package com.oracle.svm.core.option;
+package com.oracle.svm.shared.option;
 
-import jdk.graal.compiler.util.EconomicHashSet;
-import org.graalvm.collections.EconomicSet;
-
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
 public class OptionClassFilter {
-    private final EconomicHashSet<OptionOrigin> reasonCommandLine = new EconomicHashSet<>(
+    private final LinkedHashSet<OptionOrigin> reasonCommandLine = new LinkedHashSet<>(
                     Set.of(OptionOrigin.commandLineAPIOptionOriginSingleton, OptionOrigin.commandLineNonAPIOptionOriginSingleton));
 
-    private final Map<String, EconomicHashSet<OptionOrigin>> requireCompletePackageOrClass;
-    private final EconomicSet<Module> requireCompleteModules;
+    private final Map<String, LinkedHashSet<OptionOrigin>> requireCompletePackageOrClass;
+    private final LinkedHashSet<Module> requireCompleteModules;
     private boolean requireCompleteAll;
 
-    public OptionClassFilter(Map<String, EconomicHashSet<OptionOrigin>> requireCompletePackageOrClass, EconomicSet<Module> requireCompleteModules, boolean requireCompleteAll) {
+    public OptionClassFilter(Map<String, LinkedHashSet<OptionOrigin>> requireCompletePackageOrClass, LinkedHashSet<Module> requireCompleteModules, boolean requireCompleteAll) {
         this.requireCompletePackageOrClass = requireCompletePackageOrClass;
         this.requireCompleteModules = requireCompleteModules;
         this.requireCompleteAll = requireCompleteAll;
@@ -61,14 +59,14 @@ public class OptionClassFilter {
             }
         }
 
-        EconomicHashSet<OptionOrigin> origins = isPackageOrClassIncluded(className);
+        LinkedHashSet<OptionOrigin> origins = isPackageOrClassIncluded(className);
         if (origins != null) {
             return origins;
         }
         return isPackageOrClassIncluded(packageName);
     }
 
-    public EconomicHashSet<OptionOrigin> isPackageOrClassIncluded(String packageName) {
+    public LinkedHashSet<OptionOrigin> isPackageOrClassIncluded(String packageName) {
         if (requireCompleteAll) {
             return reasonCommandLine;
         }
@@ -85,7 +83,7 @@ public class OptionClassFilter {
         return null;
     }
 
-    public void addPackageOrClass(String packageOrClass, EconomicHashSet<OptionOrigin> reason) {
+    public void addPackageOrClass(String packageOrClass, LinkedHashSet<OptionOrigin> reason) {
         requireCompletePackageOrClass.put(packageOrClass, reason);
     }
 }

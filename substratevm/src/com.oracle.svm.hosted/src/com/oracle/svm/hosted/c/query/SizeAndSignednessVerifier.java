@@ -41,7 +41,7 @@ import com.oracle.svm.core.c.enums.CEnumMapLookup;
 import com.oracle.svm.core.c.enums.CEnumNoLookup;
 import com.oracle.svm.core.c.enums.CEnumRuntimeData;
 import com.oracle.svm.core.c.struct.CInterfaceLocationIdentity;
-import com.oracle.svm.core.option.HostedOptionKey;
+import com.oracle.svm.shared.option.HostedOptionKey;
 import com.oracle.svm.hosted.c.NativeLibraries;
 import com.oracle.svm.hosted.c.info.AccessorInfo;
 import com.oracle.svm.hosted.c.info.ConstantInfo;

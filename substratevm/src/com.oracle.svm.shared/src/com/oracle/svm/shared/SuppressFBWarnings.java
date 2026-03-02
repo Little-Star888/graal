@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2026, 2026, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,14 +22,23 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package com.oracle.svm.core.option;
+package com.oracle.svm.shared;
 
-public interface SubstrateOptionKey<T> {
-    void validate();
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-    boolean hasBeenSet();
+/**
+ * Used to suppress <a href="https://spotbugs.readthedocs.io">SpotBugs</a> warnings.
+ */
+@Retention(RetentionPolicy.CLASS)
+public @interface SuppressFBWarnings {
+    /**
+     * @see "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html"
+     */
+    String[] value();
 
-    T getValue();
-
-    String getName();
+    /**
+     * Reason why the warning is suppressed. Use a SpotBugs issue id where appropriate.
+     */
+    String justification();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2023, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2026, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package com.oracle.svm.core.option;
+package com.oracle.svm.shared.option;
 
 import java.io.PrintStream;
 import java.lang.reflect.Field;
@@ -35,11 +35,9 @@ import org.graalvm.collections.UnmodifiableEconomicMap;
 import org.graalvm.nativeimage.Platform;
 import org.graalvm.nativeimage.Platforms;
 
-import com.oracle.svm.common.option.CommonOptionParser;
-import com.oracle.svm.common.option.CommonOptionParser.BooleanOptionFormat;
-import com.oracle.svm.common.option.CommonOptionParser.OptionParseResult;
-import com.oracle.svm.common.option.UnsupportedOptionClassException;
-import com.oracle.svm.util.LogUtils;
+import com.oracle.svm.shared.option.CommonOptionParser.BooleanOptionFormat;
+import com.oracle.svm.shared.option.CommonOptionParser.OptionParseResult;
+import com.oracle.svm.shared.util.LogUtils;
 
 import jdk.graal.compiler.options.OptionDescriptor;
 import jdk.graal.compiler.options.OptionDescriptors;
@@ -55,7 +53,7 @@ public class SubstrateOptionsParser {
     public static final String HOSTED_OPTION_PREFIX = CommonOptionParser.HOSTED_OPTION_PREFIX;
     public static final String RUNTIME_OPTION_PREFIX = CommonOptionParser.RUNTIME_OPTION_PREFIX;
 
-    static OptionParseResult parseOption(UnmodifiableEconomicMap<String, OptionDescriptor> options, Predicate<OptionKey<?>> isHosted, String option, EconomicMap<OptionKey<?>, Object> valuesMap,
+    public static OptionParseResult parseOption(UnmodifiableEconomicMap<String, OptionDescriptor> options, Predicate<OptionKey<?>> isHosted, String option, EconomicMap<OptionKey<?>, Object> valuesMap,
                     String optionPrefix, BooleanOptionFormat booleanOptionFormat) {
         try {
             return CommonOptionParser.parseOption(options, isHosted, option, valuesMap, optionPrefix, booleanOptionFormat);

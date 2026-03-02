@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2021, 2021, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2021, 2021, Alibaba Group Holding Limited. All rights reserved.
+ * Copyright (c) 2020, 2020, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,16 +23,20 @@
  * questions.
  */
 
-package com.oracle.svm.common.option;
+package com.oracle.svm.shared.option;
 
-import jdk.graal.compiler.options.Option;
-import jdk.graal.compiler.options.OptionKey;
+public interface APIOptionGroup {
+    String name();
 
-public class CommonOptions {
+    default String helpText() {
+        return "";
+    }
 
-    @Option(help = "Show available options based on comma-separated option-types (allowed categories: User, Expert, Debug).")//
-    public static final OptionKey<String> PrintFlags = new OptionKey<>(null);
+    default char valueSeparator() {
+        return '=';
+    }
 
-    @Option(help = "Print extra help, if available, based on comma-separated option names. Pass * to show all options that contain extra help.")//
-    public static final OptionKey<String> PrintFlagsWithExtraHelp = new OptionKey<>(null);
+    default HostedOptionKey<ReplacingLocatableMultiOptionValue.DelimitedString> multiValueOption() {
+        return null;
+    }
 }

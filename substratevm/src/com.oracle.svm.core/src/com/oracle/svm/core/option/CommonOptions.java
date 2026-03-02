@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2020, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2021, 2026, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2021, 2021, Alibaba Group Holding Limited. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -25,18 +26,19 @@
 
 package com.oracle.svm.core.option;
 
-public interface APIOptionGroup {
-    String name();
+import com.oracle.svm.shared.option.CommonOptionNames;
 
-    default String helpText() {
-        return "";
-    }
+import jdk.graal.compiler.options.Option;
+import jdk.graal.compiler.options.OptionKey;
 
-    default char valueSeparator() {
-        return '=';
-    }
+/**
+ * Common options handled in the driver. See usages of {@link CommonOptionNames}.
+ */
+public class CommonOptions {
 
-    default HostedOptionKey<ReplacingLocatableMultiOptionValue.DelimitedString> multiValueOption() {
-        return null;
-    }
+    @Option(name = CommonOptionNames.PrintFlags, help = "Show available options based on comma-separated option-types (allowed categories: User, Expert, Debug).")//
+    public static final OptionKey<String> PrintFlags = new OptionKey<>(null);
+
+    @Option(name = CommonOptionNames.PrintFlagsWithExtraHelp, help = "Print extra help, if available, based on comma-separated option names. Pass * to show all options that contain extra help.")//
+    public static final OptionKey<String> PrintFlagsWithExtraHelp = new OptionKey<>(null);
 }

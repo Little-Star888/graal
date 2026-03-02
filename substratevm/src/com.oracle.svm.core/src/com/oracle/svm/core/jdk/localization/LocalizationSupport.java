@@ -53,12 +53,12 @@ import org.graalvm.nativeimage.impl.RuntimeReflectionSupport;
 import org.graalvm.nativeimage.impl.RuntimeResourceSupport;
 
 import com.oracle.svm.core.ClassLoaderSupport;
-import com.oracle.svm.core.SubstrateUtil;
 import com.oracle.svm.core.configure.RuntimeDynamicAccessMetadata;
 import com.oracle.svm.core.jdk.Resources;
 import com.oracle.svm.core.metadata.MetadataTracer;
 import com.oracle.svm.core.util.ImageHeapMap;
 import com.oracle.svm.shared.util.ReflectionUtil;
+import com.oracle.svm.shared.util.StringUtil;
 import com.oracle.svm.shared.util.VMError;
 
 import sun.util.locale.provider.LocaleProviderAdapter;
@@ -124,7 +124,7 @@ public class LocalizationSupport {
 
         /* Property-based bundle lookup happens only if class-based lookup fails */
         if (bundle instanceof PropertyResourceBundle) {
-            String[] bundleNameWithModule = SubstrateUtil.split(bundleName, ":", 2);
+            String[] bundleNameWithModule = StringUtil.split(bundleName, ":", 2);
             String resourceName;
             String origin = "Added for PropertyResourceBundle: " + bundleName;
             if (bundleNameWithModule.length < 2) {

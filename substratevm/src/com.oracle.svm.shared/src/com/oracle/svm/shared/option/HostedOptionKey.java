@@ -22,25 +22,24 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package com.oracle.svm.core.option;
+package com.oracle.svm.shared.option;
 
 import java.util.function.Consumer;
 
 import org.graalvm.collections.EconomicMap;
+import org.graalvm.nativeimage.ImageInfo;
 
-import com.oracle.svm.common.option.LocatableOption;
-import com.oracle.svm.common.option.MultiOptionValue;
-import com.oracle.svm.core.collections.EnumBitmask;
+import com.oracle.svm.shared.collections.EnumBitmask;
+import com.oracle.svm.shared.util.VMError;
 
-import jdk.graal.compiler.api.replacements.Fold;
 import jdk.graal.compiler.options.Option;
 import jdk.graal.compiler.options.OptionKey;
 
 /**
  * Defines a hosted {@link Option} that is used during native image generation, in contrast to a
- * {@link RuntimeOptionKey runtime option}.
+ * {@code RuntimeOptionKey runtime option}.
  *
- * @see com.oracle.svm.core.option
+ * See {@code com.oracle.svm.core.option}.
  */
 public class HostedOptionKey<T> extends OptionKey<T> implements SubstrateOptionKey<T> {
     private final Consumer<HostedOptionKey<T>> buildTimeValidation;
@@ -69,24 +68,22 @@ public class HostedOptionKey<T> extends OptionKey<T> implements SubstrateOptionK
     /**
      * Returns the value of this option in the {@link HostedOptionValues}.
      * <p>
-     * The result of this method is guaranteed to be constant folded in the native image due to the
-     * {@link Fold} annotation.
+     * A plugin in SubstrateGraphBuilderPlugins constant-folds this method.
      */
-    @Fold
     @Override
     public T getValue() {
+        VMError.guarantee(!ImageInfo.inImageRuntimeCode(), "Must not be called at run time");
         return getValue(HostedOptionValues.singleton());
     }
 
     /**
      * Returns {@code true} if this option has been set in the {@link HostedOptionValues}.
      * <p>
-     * The result of this method is guaranteed to be constant folded in the native image due to the
-     * {@link Fold} annotation.
+     * A plugin in SubstrateGraphBuilderPlugins constant-folds this method.
      */
-    @Fold
     @Override
     public boolean hasBeenSet() {
+        VMError.guarantee(!ImageInfo.inImageRuntimeCode(), "Must not be called at run time");
         return hasBeenSet(HostedOptionValues.singleton());
     }
 

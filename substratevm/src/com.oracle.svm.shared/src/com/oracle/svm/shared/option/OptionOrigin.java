@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2026, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -23,7 +23,7 @@
  * questions.
  */
 
-package com.oracle.svm.core.option;
+package com.oracle.svm.shared.option;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -40,10 +40,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import com.oracle.svm.core.option.OptionUtils.MacroOptionKind;
+import com.oracle.svm.shared.SuppressFBWarnings;
+import com.oracle.svm.shared.option.OptionUtils.MacroOptionKind;
 import com.oracle.svm.shared.util.VMError;
-
-import jdk.graal.compiler.core.common.SuppressFBWarnings;
 
 public abstract class OptionOrigin {
 

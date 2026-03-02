@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025, 2025, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2025, 2026, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,12 +22,13 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package com.oracle.svm.common.option;
+package com.oracle.svm.shared.option;
 
-import jdk.graal.compiler.core.common.util.CompilationAlarm;
-import jdk.graal.compiler.hotspot.CompilerConfigurationFactory;
-import jdk.graal.compiler.options.OptionKey;
 import org.graalvm.collections.EconomicSet;
+
+import com.oracle.svm.shared.util.VMError;
+
+import jdk.graal.compiler.options.OptionKey;
 
 /**
  * Native image uses its own mechanisms to handle certain options, resulting in some Graal options
@@ -39,9 +40,8 @@ public final class IntentionallyUnsupportedOptions {
 
     private static final EconomicSet<OptionKey<?>> unsupportedOptions = EconomicSet.create();
 
-    static {
-        unsupportedOptions.add(CompilerConfigurationFactory.Options.CompilerConfiguration);
-        unsupportedOptions.add(CompilationAlarm.Options.CompilationNoProgressPeriod);
+    public static void add(OptionKey<?> option) {
+        unsupportedOptions.add(option);
     }
 
     private IntentionallyUnsupportedOptions() {
@@ -49,6 +49,7 @@ public final class IntentionallyUnsupportedOptions {
     }
 
     public static boolean contains(OptionKey<?> optionKey) {
+        VMError.guarantee(!unsupportedOptions.isEmpty(), "No unsupported options set up");
         return unsupportedOptions.contains(optionKey);
     }
 }

@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2021, 2021, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2021, 2021, Alibaba Group Holding Limited. All rights reserved.
+ * Copyright (c) 2024, 2026, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -23,13 +22,27 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+package com.oracle.svm.shared.collections;
 
-package com.oracle.svm.common.option;
+public final class EnumBitmask {
+    private EnumBitmask() {
+    }
 
-public class UnsupportedOptionClassException extends Exception {
-    private static final long serialVersionUID = -3105370072461246590L;
+    public static int computeBitmask(Enum<?>[] flags) {
+        int result = 0;
+        for (Enum<?> flag : flags) {
+            assert flag.ordinal() <= Integer.SIZE - 1;
+            result |= flagBit(flag);
+        }
+        return result;
+    }
 
-    public UnsupportedOptionClassException(String msg) {
-        super(msg);
+    public static boolean hasBit(int bitmask, Enum<?> flag) {
+        return (bitmask & flagBit(flag)) != 0;
+    }
+
+    private static int flagBit(Enum<?> flag) {
+        assert flag.ordinal() < 32;
+        return 1 << flag.ordinal();
     }
 }

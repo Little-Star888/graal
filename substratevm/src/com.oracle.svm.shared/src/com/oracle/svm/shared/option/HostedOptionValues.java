@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, 2024, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2017, 2026, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,33 +22,31 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package com.oracle.svm.core.collections;
+package com.oracle.svm.shared.option;
 
-import static com.oracle.svm.guest.staging.Uninterruptible.CALLED_FROM_UNINTERRUPTIBLE_CODE;
+import org.graalvm.collections.EconomicMap;
+import org.graalvm.nativeimage.ImageSingletons;
 
-import com.oracle.svm.guest.staging.Uninterruptible;
+import com.oracle.svm.shared.singletons.traits.BuiltinTraits.BuildtimeAccessOnly;
+import com.oracle.svm.shared.singletons.traits.BuiltinTraits.NoLayeredCallbacks;
+import com.oracle.svm.shared.singletons.traits.SingletonTraits;
 
-public final class EnumBitmask {
-    private EnumBitmask() {
+import jdk.graal.compiler.options.OptionKey;
+import jdk.graal.compiler.options.OptionValues;
+
+/**
+ * The singleton holder of hosted options.
+ *
+ * See {@code com.oracle.svm.core.option}.
+ */
+@SingletonTraits(access = BuildtimeAccessOnly.class, layeredCallbacks = NoLayeredCallbacks.class)
+public class HostedOptionValues extends OptionValues {
+
+    public HostedOptionValues(EconomicMap<OptionKey<?>, Object> values) {
+        super(values);
     }
 
-    public static int computeBitmask(Enum<?>[] flags) {
-        int result = 0;
-        for (Enum<?> flag : flags) {
-            assert flag.ordinal() <= Integer.SIZE - 1;
-            result |= flagBit(flag);
-        }
-        return result;
-    }
-
-    @Uninterruptible(reason = CALLED_FROM_UNINTERRUPTIBLE_CODE, mayBeInlined = true)
-    public static boolean hasBit(int bitmask, Enum<?> flag) {
-        return (bitmask & flagBit(flag)) != 0;
-    }
-
-    @Uninterruptible(reason = CALLED_FROM_UNINTERRUPTIBLE_CODE, mayBeInlined = true)
-    private static int flagBit(Enum<?> flag) {
-        assert flag.ordinal() < 32;
-        return 1 << flag.ordinal();
+    public static OptionValues singleton() {
+        return ImageSingletons.lookup(HostedOptionValues.class);
     }
 }
